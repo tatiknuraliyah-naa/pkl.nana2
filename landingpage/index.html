@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Toko Rotii</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Navigasi utama">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">TR</div>
+          <div>
+            <strong>Toko Rotii</strong>
+            <span>Fresh bakery</span>
+          </div>
+        </div>
+
+        <nav class="nav-list">
+          <button class="nav-item active" data-view="shop" type="button">
+            <span aria-hidden="true">⌂</span>
+            Katalog
+          </button>
+          <button class="nav-item" data-view="orders" type="button">
+            <span aria-hidden="true">◷</span>
+            Pesanan
+          </button>
+          <button class="nav-item" data-view="admin" type="button">
+            <span aria-hidden="true">▦</span>
+            Admin
+          </button>
+        </nav>
+
+        <div class="store-status">
+          <span class="status-dot"></span>
+          <div>
+            <strong>Buka hari ini</strong>
+            <span>07.00 - 21.00 WIB</span>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Pre-order tersedia</p>
+            <h1>Pesan roti favorit tanpa antre.</h1>
+          </div>
+          <button class="cart-button" id="openCart" type="button">
+            <span aria-hidden="true">▣</span>
+            Keranjang
+            <strong id="cartCount">0</strong>
+          </button>
+        </header>
+
+        <section class="view active" id="shopView" aria-label="Katalog produk">
+          <div class="toolbar">
+            <label class="search-box">
+              <span aria-hidden="true">⌕</span>
+              <input id="searchInput" type="search" placeholder="Cari roti, pastry, kue..." />
+            </label>
+            <div class="category-tabs" id="categoryTabs" aria-label="Filter kategori"></div>
+          </div>
+
+          <section class="featured-band">
+            <div>
+              <p class="eyebrow">Paket favorit</p>
+              <h2>Morning Bread Box</h2>
+              <p>6 roti campur, cocok untuk sarapan keluarga atau bekal kantor.</p>
+            </div>
+            <div class="featured-visual" aria-hidden="true">
+              <span class="bread bread-one"></span>
+              <span class="bread bread-two"></span>
+              <span class="bread bread-three"></span>
+            </div>
+            <button class="primary-button" id="addFeatured" type="button">Tambah Paket</button>
+          </section>
+
+          <div class="section-title">
+            <h2>Katalog Produk</h2>
+            <p id="productSummary">Semua produk tersedia hari ini.</p>
+          </div>
+          <div class="product-grid" id="productGrid"></div>
+        </section>
+
+        <section class="view" id="ordersView" aria-label="Riwayat pesanan">
+          <div class="section-title">
+            <h2>Riwayat Pesanan</h2>
+            <p>Lacak status pesanan dari konfirmasi sampai selesai.</p>
+          </div>
+          <div class="orders-list" id="ordersList"></div>
+        </section>
+
+        <section class="view" id="adminView" aria-label="Panel admin">
+          <div class="admin-layout">
+            <section>
+              <div class="section-title">
+                <h2>Pesanan Masuk</h2>
+                <p>Ubah status pesanan pelanggan secara cepat.</p>
+              </div>
+              <div class="admin-orders" id="adminOrders"></div>
+            </section>
+
+            <section>
+              <div class="section-title">
+                <h2>Manajemen Produk</h2>
+                <p>Atur stok dan status produk toko.</p>
+              </div>
+              <div class="admin-products" id="adminProducts"></div>
+            </section>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <dialog class="cart-drawer" id="cartDialog" aria-label="Keranjang belanja">
+      <form method="dialog" class="drawer-header">
+        <div>
+          <p class="eyebrow">Checkout</p>
+          <h2>Keranjang Belanja</h2>
+        </div>
+        <button class="icon-button" type="submit" aria-label="Tutup keranjang">×</button>
+      </form>
+
+      <div class="cart-items" id="cartItems"></div>
+
+      <form class="checkout-form" id="checkoutForm">
+        <div class="form-row">
+          <label>
+            Nama pelanggan
+            <input id="customerName" type="text" value="Nana" required />
+          </label>
+          <label>
+            Nomor telepon
+            <input id="customerPhone" type="tel" value="081234567890" required />
+          </label>
+        </div>
+
+        <label>
+          Metode penerimaan
+          <select id="fulfillment">
+            <option value="Ambil di toko">Ambil di toko</option>
+            <option value="Pengantaran">Pengantaran</option>
+          </select>
+        </label>
+
+        <label>
+          Alamat atau catatan
+          <textarea id="orderNote" rows="3" placeholder="Alamat pengantaran, jam ambil, atau catatan pesanan"></textarea>
+        </label>
+
+        <label>
+          Metode pembayaran
+          <select id="paymentMethod">
+            <option>Bayar di toko</option>
+            <option>Transfer bank manual</option>
+            <option>E-wallet manual</option>
+          </select>
+        </label>
+
+        <div class="cart-total">
+          <span>Total</span>
+          <strong id="cartTotal">Rp0</strong>
+        </div>
+
+        <button class="primary-button full" type="submit">Konfirmasi Pesanan</button>
+      </form>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
