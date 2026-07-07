@@ -20,8 +20,7 @@ const products = [
     price: 18000,
     stock: 14,
     description: "Pastry renyah berlapis dengan aroma butter yang kuat.",
-    color: "#f6d46d",
-    shape: "croissant",
+    image: "croisant.jpeg"
   },
   {
     id: "roti-cokelat",
@@ -30,28 +29,25 @@ const products = [
     price: 12000,
     stock: 22,
     description: "Roti lembut dengan isian cokelat pekat.",
-    color: "#b86a35",
-    shape: "bun",
+    image: "choco cinnamon.jpeg"
   },
   {
     id: "roti-tawar",
-    name: "Roti Tawar Susu",
+    name: "bread cream",
     category: "Roti Tawar",
     price: 26000,
     stock: 7,
-    description: "Roti tawar tebal untuk sarapan dan bekal.",
-    color: "#f1c681",
-    shape: "loaf",
+    description: "Roti lembut dengan cream susu ringan.",
+    image: "bread milk.jpeg"
   },
   {
     id: "cheese-roll",
     name: "Cheese Roll",
     category: "Roti Manis",
-    price: 15000,
+    price: 8000,
     stock: 4,
     description: "Roti gulung lembut dengan keju gurih.",
-    color: "#e8b24c",
-    shape: "roll",
+    image: "bread cheese roll.jpeg"
   },
   {
     id: "donat-kayu-manis",
@@ -60,8 +56,7 @@ const products = [
     price: 10000,
     stock: 0,
     description: "Donat empuk dengan taburan gula kayu manis.",
-    color: "#c9793d",
-    shape: "donut",
+    image: "cinamon donuts.jpeg"
   },
   {
     id: "cake-berry",
@@ -69,9 +64,8 @@ const products = [
     category: "Kue",
     price: 34000,
     stock: 9,
-    description: "Kue mini dengan krim ringan dan saus berry.",
-    color: "#d85e72",
-    shape: "cake",
+    description: "Kue mini dengan krim ringan dan berry.",
+    image: "berry cake.jpeg"
   },
   {
     id: "kopi-susu",
@@ -80,8 +74,7 @@ const products = [
     price: 16000,
     stock: 18,
     description: "Kopi susu dingin untuk teman pastry.",
-    color: "#8d644d",
-    shape: "cup",
+    image: "coffe latte.jpeg"
   },
   {
     id: "morning-box",
@@ -90,8 +83,7 @@ const products = [
     price: 72000,
     stock: 6,
     description: "Paket 6 roti campur untuk keluarga atau kantor.",
-    color: "#db8d44",
-    shape: "box",
+    image: "bread lunch.jpeg"
   },
 ];
 
@@ -185,8 +177,8 @@ function renderProducts() {
       const stock = stockLabel(product.stock);
       return `
         <article class="product-card">
-          <div class="product-art" style="--art-bg: ${product.stock > 0 ? "#fff2dc" : "#f3ece4"}">
-            ${productSvg(product)}
+          <div class="product-image">
+            <img src="${product.image}" alt="${product.name}">
           </div>
           <div class="product-body">
             <div class="product-info">
