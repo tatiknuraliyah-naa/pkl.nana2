@@ -24,7 +24,7 @@ const products = [
   },
   {
     id: "roti-cokelat",
-    name: "Roti Cokelat Lumer",
+    name: "chocolate lava bread",
     category: "Roti Manis",
     price: 12000,
     stock: 22,
@@ -51,7 +51,7 @@ const products = [
   },
   {
     id: "donat-kayu-manis",
-    name: "Donat Kayu Manis",
+    name: "cinnamon donut",
     category: "Pastry",
     price: 10000,
     stock: 0,
@@ -69,7 +69,7 @@ const products = [
   },
   {
     id: "kopi-susu",
-    name: "Kopi Susu Rotii",
+    name: "coffe latte",
     category: "Minuman",
     price: 16000,
     stock: 18,
