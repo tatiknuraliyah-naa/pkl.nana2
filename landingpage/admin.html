@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>Admin serenyt Bakery</title>
+    <link rel="stylesheet"
+          href="styles.css">
+</head>
+
+<body>
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-mark">
+                🥐
+            </div>
+            <div>
+                <strong>serenyt Bakery</strong>
+                <span>Admin Area</span>
+            </div>
+        </div>
+
+        <nav class="nav-list">
+            <a class="nav-item"
+               href="index.html">
+                🏠
+                Pembeli
+            </a>
+            <button class="nav-item active"
+                    type="button">
+                ⚙️
+                Admin
+            </button>
+        </nav>
+
+        <div class="store-status">
+            <span class="status-dot"></span>
+            <div>
+                <strong>Buka Hari Ini</strong>
+                <span>07.00 - 21.00 WIB</span>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar">
+            <div>
+                <p class="eyebrow">
+                    Dashboard Admin
+                </p>
+                <h1>
+                    Kelola Pesanan
+                </h1>
+                <br>
+                <p class="hero-desc">
+                    Login untuk mengatur status, stok, dan cetak struk.
+                </p>
+            </div>
+
+            <button class="cart-button"
+                    id="logoutAdmin"
+                    type="button">
+                ⎋
+                Logout
+            </button>
+        </header>
+
+        <section class="auth-panel"
+                 id="loginView">
+            <form class="login-card"
+                  id="adminLoginForm">
+                <p class="eyebrow">
+                    Login Admin
+                </p>
+                <h2>
+                    Masuk ke Dashboard
+                </h2>
+                <label>
+                    Username
+                    <input id="adminUsername"
+                           type="text"
+                           autocomplete="username"
+                           required>
+                </label>
+                <label>
+                    Password
+                    <input id="adminPassword"
+                           type="password"
+                           autocomplete="current-password"
+                           required>
+                </label>
+                <button class="primary-button full"
+                        type="submit">
+                    Login
+                </button>
+                <p class="login-hint">
+                    Username: admin • Password: admin123
+                </p>
+            </form>
+        </section>
+
+        <section id="adminPanel"
+                 hidden>
+            <div class="admin-layout">
+                <section>
+                    <div class="section-title">
+                        <h2>
+                            Pesanan Masuk
+                        </h2>
+                        <p>
+                            Ubah status atau cetak struk.
+                        </p>
+                    </div>
+
+                    <div id="adminOrders"
+                         class="admin-orders">
+                    </div>
+                </section>
+
+                <section>
+                    <div class="section-title">
+                        <h2>
+                            Produk
+                        </h2>
+                        <p>
+                            Atur stok menu.
+                        </p>
+                    </div>
+
+                    <div id="adminProducts"
+                         class="admin-products">
+                    </div>
+                </section>
+            </div>
+        </section>
+    </main>
+</div>
+
+<div class="toast"
+     id="toast">
+</div>
+
+<script src="app.js"></script>
+</body>
+
+</html>

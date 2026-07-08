@@ -12,93 +12,584 @@ const statusFlow = [
   "Selesai",
 ];
 
+const categorySearchTags = {
+  Bread: "bread roti roti manis roti tawar bun loaf garlic",
+  Pastry: "pastry croissant danish cinnamon roll",
+  Donuts: "donuts donut donat",
+  "Cakes & Desserts": "cakes desserts cake kue dessert cheesecake tart brownies panna cotta",
+  Cookies: "cookies cookie kue kering biskuit",
+  Coffee: "coffee kopi espresso americano cappuccino latte mocha",
+  "Non-Coffee": "non coffee non-coffee tanpa kopi minuman teh tea matcha milk chocolate",
+  Refreshments: "refreshments minuman segar soda sparkling yakult",
+  "Baker's Box": "baker box baker's box paket hampers custom family signature",
+};
+
 const products = [
   {
-    id: "croissant-butter",
+    id: "strawberry-cloud-milk",
+    name: "Strawberry Cloud Milk",
+    category: "Non-Coffee",
+    price: 18000,
+    stock: 18,
+    description: "Susu strawberry creamy yang lembut.",
+    image: "https://i.pinimg.com/736x/90/3e/a6/903ea69c75d9c2874fb5f1386586f2db.jpg",
+  },
+  {
+    id: "butter-croissant",
     name: "Butter Croissant",
     category: "Pastry",
-    price: 18000,
-    stock: 14,
-    description: "Pastry renyah berlapis dengan aroma butter yang kuat.",
-    image: "https://i.pinimg.com/1200x/56/22/39/562239e127eaa2f88054c6b2d39ee0df.jpg"
+    price: 22000,
+    stock: 12,
+    description: "Croissant renyah dengan aroma butter.",
+    image: "https://i.pinimg.com/1200x/56/22/39/562239e127eaa2f88054c6b2d39ee0df.jpg",
   },
   {
-    id: "roti-cokelat",
-    name: "chocolate lava bread",
-    category: "Roti Manis",
+    id: "chocolate-donut",
+    name: "Chocolate Donut",
+    category: "Donuts",
     price: 12000,
-    stock: 22,
-    description: "Roti lembut dengan isian cokelat pekat.",
-    image: "https://i.pinimg.com/736x/82/b3/a0/82b3a0bd9b41fab401a803e93f4b97a8.jpg"
+    stock: 12,
+    description: "Donat lembut dengan topping cokelat.",
+    image: "https://i.pinimg.com/736x/44/4a/2f/444a2fe12637fb7ddf94a9d168bb5f60.jpg",
   },
   {
-    id: "roti-tawar",
-    name: "bread cream",
-    category: "Roti Tawar",
-    price: 26000,
-    stock: 7,
-    description: "Roti lembut dengan cream susu ringan.",
-    image: "https://i.pinimg.com/1200x/08/ac/46/08ac46364ab668182c705bfca3715665.jpg"
-  },
-  {
-    id: "cheese-roll",
-    name: "Cheese Roll",
-    category: "Roti Manis",
-    price: 8000,
-    stock: 4,
-    description: "Roti gulung lembut dengan keju gurih.",
-    image: "https://i.pinimg.com/736x/a6/17/9f/a6179f256963f4715317a0d00da85cbc.jpg"
-  },
-  {
-    id: "donat-kayu-manis",
-    name: "cinnamon donut",
-    category: "Pastry",
-    price: 10000,
-    stock: 0,
-    description: "Donat empuk dengan taburan gula kayu manis.",
-    image: "https://i.pinimg.com/736x/77/32/b4/7732b44089788c15f9efd102a2b20bae.jpg"
-  },
-  {
-    id: "cake-berry",
-    name: "Bloom Mini Cake",
-    category: "Kue",
-    price: 34000,
-    stock: 9,
-    description: "Kue mini cantik dengan topping pilihan dan cita rasa yang lembut.",
-    image: "https://i.pinimg.com/1200x/1a/e4/20/1ae420f77902137d40bf3592201664a6.jpg"
-  },
-  {
-    id: "kopi-susu",
-    name: "coffe latte",
-    category: "Minuman",
-    price: 16000,
+    id: "golden-milk-bread",
+    name: "Golden Milk Bread",
+    category: "Bread",
+    price: 15000,
     stock: 18,
-    description: "Kopi susu dingin untuk teman pastry.",
-    image: "https://i.pinimg.com/736x/c4/cb/22/c4cb22da46cf14e76c01fcbdebe15393.jpg"
+    description: "Roti susu lembut favorit pelanggan.",
+    image: "https://i.pinimg.com/1200x/2a/be/5e/2abe5edfccd90d63f6e55d9ea7f0e11f.jpg",
   },
   {
-    id: "morning-box",
-    name: "Morning Bread Box",
-    category: "Paket",
+    id: "tiramisu",
+    name: "Tiramisu",
+    category: "Cakes & Desserts",
+    price: 34000,
+    stock: 12,
+    description: "Dessert creamy dengan rasa kopi.",
+    image: "https://i.pinimg.com/736x/3c/c9/66/3cc9664134ea11ae6d470d4fad8a182c.jpg",
+  },
+  {
+    id: "americano",
+    name: "Americano",
+    category: "Coffee",
+    price: 18000,
+    stock: 12,
+    description: "Kopi hitam ringan dan menyegarkan.",
+    image: "https://i.pinimg.com/736x/42/dc/61/42dc61aa66899a5ef2cf4cf145ef9f40.jpg",
+  },
+  {
+    id: "classic-bakers-box",
+    name: "Classic Baker's Box",
+    category: "Baker's Box",
+    price: 68000,
+    stock: 12,
+    description: "Paket roti untuk sarapan hangat.",
+    image: "https://i.pinimg.com/1200x/2d/77/79/2d777957670fd2830148f096f4847b68.jpg",
+  },
+  {
+    id: "matcha-donut",
+    name: "Matcha Donut",
+    category: "Donuts",
+    price: 12000,
+    stock: 12,
+    description: "Donat manis dengan topping matcha.",
+    image: "https://i.pinimg.com/736x/2e/6e/93/2e6e9333319ae5dbb7de1bdceaac64f7.jpg",
+  },
+  {
+    id: "cream-cheese-garlic-bread",
+    name: "Cream Cheese Garlic Bread",
+    category: "Bread",
+    price: 15000,
+    stock: 12,
+    description: "Roti gurih dengan cream cheese.",
+    image: "https://i.pinimg.com/1200x/f0/b7/40/f0b740a774b8e2b1c1b8d0f27dd589cc.jpg",
+  },
+  {
+    id: "caramel-latte",
+    name: "Caramel Latte",
+    category: "Coffee",
+    price: 18000,
+    stock: 12,
+    description: "Latte creamy dengan caramel manis.",
+    image: "https://i.pinimg.com/1200x/94/38/65/943865d41a8675c959ddf82aef1667ec.jpg",
+  },
+  {
+    id: "berry-danish",
+    name: "Berry Danish",
+    category: "Pastry",
+    price: 22000,
+    stock: 12,
+    description: "Pastry renyah dengan rasa berry.",
+    image: "https://i.pinimg.com/1200x/ae/84/75/ae84753a015ae60903134af0ee7941aa.jpg",
+  },
+  {
+    id: "red-velvet-cake",
+    name: "Red Velvet Cake",
+    category: "Cakes & Desserts",
+    price: 34000,
+    stock: 12,
+    description: "Cake lembut dengan cream manis.",
+    image: "https://i.pinimg.com/736x/d4/6a/6e/d46a6e81f744cdb54202e2cc3465c9c3.jpg",
+  },
+  {
+    id: "vanilla-latte",
+    name: "Vanilla Latte",
+    category: "Coffee",
+    price: 18000,
+    stock: 12,
+    description: "Latte creamy dengan aroma vanilla.",
+    image: "https://i.pinimg.com/736x/1b/c6/07/1bc607f2466a5c9f062b0d5b8a436fb8.jpg",
+  },
+  {
+    id: "chocolate-cake",
+    name: "Chocolate Cake",
+    category: "Cakes & Desserts",
+    price: 34000,
+    stock: 12,
+    description: "Cake cokelat lembut dan manis.",
+    image: "https://i.pinimg.com/1200x/fa/ba/df/fabadf995bd65e8010b385456e9cd859.jpg",
+  },
+  {
+    id: "honey-glazed-donut",
+    name: "Honey Glazed Donut",
+    category: "Donuts",
+    price: 12000,
+    stock: 18,
+    description: "Donat lembut dengan glaze madu.",
+    image: "https://i.pinimg.com/1200x/c8/c6/17/c8c617f5e26bb6a77a6e323c6c7d9bb0.jpg",
+  },
+  {
+    id: "tuna-mayo-bread",
+    name: "Tuna Mayo Bread",
+    category: "Bread",
+    price: 15000,
+    stock: 12,
+    description: "Roti gurih isi tuna mayo.",
+    image: "https://i.pinimg.com/736x/c4/b1/4e/c4b14e0be58dfa19e18f91358b5d7c51.jpg",
+  },
+  {
+    id: "peach-tea",
+    name: "Peach Tea",
+    category: "Non-Coffee",
+    price: 18000,
+    stock: 12,
+    description: "Teh peach segar dan fruity.",
+    image: "https://i.pinimg.com/736x/18/ec/8d/18ec8db92a6dc4f5c801541e959f3d0d.jpg",
+  },
+  {
+    id: "almond-croissant",
+    name: "Almond Croissant",
+    category: "Pastry",
+    price: 22000,
+    stock: 12,
+    description: "Croissant butter dengan almond.",
+    image: "https://i.pinimg.com/736x/86/a1/d6/86a1d68e21ed48b69e856c0985f76345.jpg",
+  },
+  {
+    id: "matcha-cookies",
+    name: "Matcha Cookies",
+    category: "Cookies",
+    price: 18000,
+    stock: 12,
+    description: "Cookies renyah rasa matcha.",
+    image: "https://i.pinimg.com/1200x/ff/5b/40/ff5b407faff74f628c146d87ceacd45d.jpg",
+  },
+  {
+    id: "honey-matcha-latte",
+    name: "Honey Matcha Latte",
+    category: "Non-Coffee",
+    price: 18000,
+    stock: 18,
+    description: "Matcha creamy dengan madu.",
+    image: "https://i.pinimg.com/736x/77/4e/cc/774ecc5585ef60d252fe095f930b0958.jpg",
+  },
+  {
+    id: "pain-au-chocolat",
+    name: "Pain au Chocolat",
+    category: "Pastry",
+    price: 22000,
+    stock: 12,
+    description: "Pastry klasik isi cokelat.",
+    image: "https://i.pinimg.com/1200x/28/e8/4f/28e84f749ceb5e75b761e8d39ecd2798.jpg",
+  },
+  {
+    id: "sea-salt-cookies",
+    name: "Sea Salt Cookies",
+    category: "Cookies",
+    price: 18000,
+    stock: 18,
+    description: "Cookies manis dengan sentuhan asin.",
+    image: "https://i.pinimg.com/1200x/12/f5/ef/12f5ef86bdcaa38671c1b94f0f4ef415.jpg",
+  },
+  {
+    id: "serenyt-latte",
+    name: "Serenyt Latte",
+    category: "Coffee",
+    price: 18000,
+    stock: 18,
+    description: "Signature latte khas Serenyt.",
+    image: "https://i.pinimg.com/1200x/43/fb/37/43fb376f34e68e7c2aec44e0e10c5d69.jpg",
+  },
+  {
+    id: "strawberry-shortcake",
+    name: "Strawberry Shortcake",
+    category: "Cakes & Desserts",
+    price: 34000,
+    stock: 12,
+    description: "Cake strawberry lembut dan segar.",
+    image: "https://i.pinimg.com/736x/27/9a/d4/279ad41838d430abb111693286aa07ec.jpg",
+  },
+  {
+    id: "butter-cookies",
+    name: "Butter Cookies",
+    category: "Cookies",
+    price: 18000,
+    stock: 12,
+    description: "Cookies butter dengan rasa klasik.",
+    image: "https://i.pinimg.com/736x/42/f0/f1/42f0f12a9ed16180f2dfc6d981ad5ae3.jpg",
+  },
+  {
+    id: "blue-ocean",
+    name: "Blue Ocean",
+    category: "Refreshments",
+    price: 17000,
+    stock: 12,
+    description: "Minuman segar dengan rasa tropis.",
+    image: "https://i.pinimg.com/736x/d5/8a/d8/d58ad887c192387f57ae5959719abc5e.jpg",
+  },
+  {
+    id: "butter-cloud-bread",
+    name: "Butter Cloud Bread",
+    category: "Bread",
+    price: 15000,
+    stock: 18,
+    description: "Roti lembut dengan rasa butter.",
+    image: "https://i.pinimg.com/1200x/cb/da/95/cbda95c8e29e98e3ff81ef3fd6f9e6f0.jpg",
+  },
+  {
+    id: "cinnamon-roll",
+    name: "Cinnamon Roll",
+    category: "Pastry",
+    price: 22000,
+    stock: 12,
+    description: "Roll manis dengan aroma kayu manis.",
+    image: "https://i.pinimg.com/1200x/a0/ac/97/a0ac97b501f07ace8db6366ebfb9be83.jpg",
+  },
+  {
+    id: "thai-tea",
+    name: "Thai Tea",
+    category: "Non-Coffee",
+    price: 18000,
+    stock: 12,
+    description: "Teh susu creamy khas Thailand.",
+    image: "https://i.pinimg.com/1200x/6a/b7/cb/6ab7cb015130463f12f817a6a90b741a.jpg",
+  },
+  {
+    id: "chocolate-chip-cookies",
+    name: "Chocolate Chip Cookies",
+    category: "Cookies",
+    price: 18000,
+    stock: 12,
+    description: "Cookies renyah dengan cokelat.",
+    image: "https://i.pinimg.com/736x/f8/b3/25/f8b325430ba7a80258119770bc81fbe8.jpg",
+  },
+  {
+    id: "family-bakers-box",
+    name: "Family Baker's Box",
+    category: "Baker's Box",
+    price: 128000,
+    stock: 12,
+    description: "Paket besar untuk berbagi bersama.",
+    image: "https://i.pinimg.com/1200x/6c/6f/c2/6c6fc252fe7984c3cc74e797886e4850.jpg",
+  },
+  {
+    id: "lemon-sparkling",
+    name: "Lemon Sparkling",
+    category: "Refreshments",
+    price: 17000,
+    stock: 12,
+    description: "Minuman lemon soda yang segar.",
+    image: "https://i.pinimg.com/736x/92/e3/c9/92e3c98ad5daf2200b9ab4a377ae90b7.jpg",
+  },
+  {
+    id: "japanese-cheesecake",
+    name: "Japanese Cheesecake",
+    category: "Cakes & Desserts",
+    price: 34000,
+    stock: 12,
+    description: "Cheesecake ringan dan lembut.",
+    image: "https://i.pinimg.com/1200x/64/b0/79/64b07982eddcebdcfd7c044691c7f700.jpg",
+  },
+  {
+    id: "garlic-bread",
+    name: "Garlic Bread",
+    category: "Bread",
+    price: 15000,
+    stock: 12,
+    description: "Roti gurih dengan aroma garlic.",
+    image: "https://i.pinimg.com/1200x/ed/9e/b3/ed9eb36cdddf281e44c8441c18d5d07b.jpg",
+  },
+  {
+    id: "caramel-cloud-latte",
+    name: "Caramel Cloud Latte",
+    category: "Coffee",
+    price: 18000,
+    stock: 12,
+    description: "Latte creamy dengan caramel lembut.",
+    image: "https://i.pinimg.com/1200x/9b/40/9a/9b409a56b7445fca2cef2c8fd8d7db2e.jpg",
+  },
+  {
+    id: "custom-bakers-box",
+    name: "Custom Baker's Box",
+    category: "Baker's Box",
     price: 72000,
-    stock: 6,
-    description: "Paket 6 roti campur untuk keluarga atau kantor.",
-    image: "https://i.pinimg.com/736x/ad/c2/ed/adc2edd4df873d006cf187b37a2cc103.jpg"
+    stock: 12,
+    description: "Paket sesuai pilihan favoritmu.",
+    image: "https://i.pinimg.com/736x/ad/c2/ed/adc2edd4df873d006cf187b37a2cc103.jpg",
+  },
+  {
+    id: "double-chocolate-cookies",
+    name: "Double Chocolate Cookies",
+    category: "Cookies",
+    price: 18000,
+    stock: 12,
+    description: "Cookies cokelat dengan rasa bold.",
+    image: "https://i.pinimg.com/1200x/ac/56/b3/ac56b344e6fc67be118efc4f039e385b.jpg",
+  },
+  {
+    id: "vanilla-milk",
+    name: "Vanilla Milk",
+    category: "Non-Coffee",
+    price: 18000,
+    stock: 12,
+    description: "Susu vanilla creamy dan lembut.",
+    image: "https://i.pinimg.com/736x/5d/8b/67/5d8b6707b55198d8dd37fbfe033009ef.jpg",
+  },
+  {
+    id: "chicken-floss-bread",
+    name: "Chicken Floss Bread",
+    category: "Bread",
+    price: 15000,
+    stock: 12,
+    description: "Roti lembut dengan topping abon.",
+    image: "https://i.pinimg.com/1200x/10/c9/ac/10c9acd3011be7e0759441f7698ce8f8.jpg",
+  },
+  {
+    id: "mocha",
+    name: "Mocha",
+    category: "Coffee",
+    price: 18000,
+    stock: 12,
+    description: "Kopi creamy dengan rasa cokelat.",
+    image: "https://i.pinimg.com/1200x/dd/c8/fc/ddc8fc1293df9f8830d042a113cd2645.jpg",
+  },
+  {
+    id: "burnt-cheesecake",
+    name: "Burnt Cheesecake",
+    category: "Cakes & Desserts",
+    price: 34000,
+    stock: 12,
+    description: "Cheesecake lembut dengan rasa rich.",
+    image: "https://i.pinimg.com/736x/93/f7/6e/93f76e8fbb5932aae2622b035c1ae0d7.jpg",
+  },
+  {
+    id: "strawberry-donut",
+    name: "Strawberry Donut",
+    category: "Donuts",
+    price: 12000,
+    stock: 12,
+    description: "Donat manis dengan strawberry.",
+    image: "https://i.pinimg.com/736x/e8/5c/f6/e85cf60ce9f801c9fae30ab7be308284.jpg",
+  },
+  {
+    id: "honey-butter-cookies",
+    name: "Honey Butter Cookies",
+    category: "Cookies",
+    price: 18000,
+    stock: 12,
+    description: "Cookies butter dengan madu.",
+    image: "https://i.pinimg.com/1200x/4d/5a/42/4d5a4201e295c5e1f692b3812c4bee00.jpg",
+  },
+  {
+    id: "mango-yakult",
+    name: "Mango Yakult",
+    category: "Refreshments",
+    price: 17000,
+    stock: 12,
+    description: "Minuman mangga segar dan fruity.",
+    image: "https://i.pinimg.com/736x/3d/67/90/3d67903e3a5f0989f1567e5481f53391.jpg",
+  },
+  {
+    id: "signature-bakers-box",
+    name: "Signature Baker's Box",
+    category: "Baker's Box",
+    price: 92000,
+    stock: 10,
+    description: "Paket signature pilihan Serenyt.",
+    image: "https://i.pinimg.com/1200x/59/37/8b/59378ba401f766afc9e95624adf9de4a.jpg",
+  },
+  {
+    id: "chocolate",
+    name: "Chocolate",
+    category: "Non-Coffee",
+    price: 18000,
+    stock: 12,
+    description: "Minuman cokelat creamy.",
+    image: "https://i.pinimg.com/736x/03/89/6b/03896bfdd6aae501967a378097dcc135.jpg",
+  },
+  {
+    id: "maple-cinnamon-roll",
+    name: "Maple Cinnamon Roll",
+    category: "Bread",
+    price: 15000,
+    stock: 18,
+    description: "Roti manis dengan maple.",
+    image: "https://i.pinimg.com/1200x/e9/ef/91/e9ef91dd697a367a63ff0deeee574ee6.jpg",
+  },
+  {
+    id: "cookies-and-cream-donut",
+    name: "Cookies & Cream Donut",
+    category: "Donuts",
+    price: 12000,
+    stock: 12,
+    description: "Donat lembut topping cookies.",
+    image: "https://i.pinimg.com/736x/69/c4/2c/69c42c64b571eac4a7af1f4f3a73c852.jpg",
+  },
+  {
+    id: "lemon-tea",
+    name: "Lemon Tea",
+    category: "Non-Coffee",
+    price: 18000,
+    stock: 12,
+    description: "Teh lemon segar dan ringan.",
+    image: "https://i.pinimg.com/736x/64/bb/bc/64bbbc45a302b646abee022c00ca0c41.jpg",
+  },
+  {
+    id: "almond-cookies",
+    name: "Almond Cookies",
+    category: "Cookies",
+    price: 18000,
+    stock: 12,
+    description: "Cookies renyah dengan almond.",
+    image: "https://i.pinimg.com/1200x/94/6b/75/946b75d5e54e65875b818838617895aa.jpg",
+  },
+  {
+    id: "milk-bread",
+    name: "Milk Bread",
+    category: "Bread",
+    price: 15000,
+    stock: 12,
+    description: "Roti susu lembut favorit harian.",
+    image: "https://i.pinimg.com/1200x/e7/3e/38/e73e381e48e5035109089ab7627c6fb6.jpg",
+  },
+  {
+    id: "butter-bun",
+    name: "Butter Bun",
+    category: "Bread",
+    price: 15000,
+    stock: 12,
+    description: "Roti lembut dengan rasa butter.",
+    image: "https://i.pinimg.com/1200x/97/6f/ae/976fae856fd4d2a868e9b25bc3fdd01d.jpg",
+  },
+  {
+    id: "cheese-bun",
+    name: "Cheese Bun",
+    category: "Bread",
+    price: 15000,
+    stock: 12,
+    description: "Roti gurih dengan keju creamy.",
+    image: "https://i.pinimg.com/1200x/e4/32/d5/e432d5295f865372866cde9f66746859.jpg",
+  },
+  {
+    id: "chocolate-bun",
+    name: "Chocolate Bun",
+    category: "Bread",
+    price: 15000,
+    stock: 12,
+    description: "Roti manis dengan isian cokelat.",
+    image: "https://i.pinimg.com/736x/60/76/b5/6076b5267eb725c827d919c3dfa56519.jpg",
+  },
+  {
+    id: "sausage-bun",
+    name: "Sausage Bun",
+    category: "Bread",
+    price: 15000,
+    stock: 12,
+    description: "Roti gurih dengan sosis.",
+    image: "https://i.pinimg.com/1200x/30/3b/4e/303b4e7c301c0c9ccdb2f2d7be4fb8e0.jpg",
+  },
+  {
+    id: "glazed-donut",
+    name: "Glazed Donut",
+    category: "Donuts",
+    price: 12000,
+    stock: 12,
+    description: "Donat lembut dengan glaze manis.",
+    image: "https://i.pinimg.com/736x/68/16/a1/6816a126c898b8b157fac887b8520af6.jpg",
+  },
+  {
+    id: "biscoff-donut",
+    name: "Biscoff Donut",
+    category: "Donuts",
+    price: 12000,
+    stock: 12,
+    description: "Donat dengan topping biscoff.",
+    image: "https://i.pinimg.com/736x/c3/3b/c0/c33bc025f8c4af53233447eea9c6fde3.jpg",
+  },
+  {
+    id: "latte",
+    name: "Latte",
+    category: "Coffee",
+    price: 18000,
+    stock: 12,
+    description: "Kopi susu creamy klasik.",
+    image: "https://i.pinimg.com/736x/16/a9/3d/16a93d9777c89238a65861cf3ad797dd.jpg",
+  },
+  {
+    id: "espresso",
+    name: "Espresso",
+    category: "Coffee",
+    price: 18000,
+    stock: 12,
+    description: "Kopi pekat dengan aroma kuat.",
+    image: "https://i.pinimg.com/1200x/9f/d4/41/9fd441d4bafd82c93f0c241860c9f86b.jpg",
   },
   {
     id: "matcha-latte",
     name: "Matcha Latte",
-    category: "Drink",
-    price: 16000,
-    stock: 6,
-    description: "Matcha latte dengan aroma matcha yang khas.",
-    image: "https://i.pinimg.com/1200x/45/9a/fb/459afbc3f9000c8001ab06e67549b924.jpg"
+    category: "Non-Coffee",
+    price: 18000,
+    stock: 12,
+    description: "Matcha creamy dengan rasa lembut.",
+    image: "https://i.pinimg.com/1200x/45/9a/fb/459afbc3f9000c8001ab06e67549b924.jpg",
+  },
+  {
+    id: "lychee-tea",
+    name: "Lychee Tea",
+    category: "Non-Coffee",
+    price: 18000,
+    stock: 12,
+    description: "Teh lychee segar dan fruity.",
+    image: "https://i.pinimg.com/736x/29/0c/64/290c64b4365714357b63e5319226def7.jpg",
+  },
+  {
+    id: "berry-breeze-soda",
+    name: "Berry Breeze Soda",
+    category: "Refreshments",
+    price: 17000,
+    stock: 12,
+    description: "Soda berry yang menyegarkan.",
+    image: "https://i.pinimg.com/1200x/8f/99/17/8f9917e1123fc258eb128ee62fdf1de6.jpg",
   },
 ];
 
 let selectedCategory = "Semua";
 let searchTerm = "";
 let cart = [];
+let buyers = [];
+let currentSession = null;
 let orders = [
   {
     id: "TR-260703-001",
@@ -116,6 +607,46 @@ let orders = [
   },
 ];
 
+const storageKeys = {
+  orders: "serenytOrders",
+  productStocks: "serenytProductStocks",
+  adminLoggedIn: "serenytAdminLoggedIn",
+  buyers: "serenytBuyers",
+  currentSession: "serenytCurrentSession",
+  storeHours: "serenytStoreHours",
+};
+
+let storeHours = {
+  open: "07:00",
+  close: "21:00",
+};
+
+const demoBuyer = {
+  id: "buyer-demo",
+  name: "Nana",
+  email: "nana@serenyt.test",
+  phone: "081288889999",
+  address: "Jl. Bakery Manis No. 7",
+  password: "nana123",
+  photo: "logo.png",
+  photoHistory: [],
+};
+
+const authScreen = document.querySelector("#authScreen");
+const appShell = document.querySelector("#appShell");
+const authTabs = document.querySelectorAll("[data-auth-tab]");
+const authPanels = document.querySelectorAll("[data-auth-panel]");
+const adminTabs = document.querySelectorAll("[data-admin-page]");
+const adminPages = document.querySelectorAll(".admin-page");
+const buyerLoginForm = document.querySelector("#buyerLoginForm");
+const buyerRegisterForm = document.querySelector("#buyerRegisterForm");
+const mainAdminLoginForm = document.querySelector("#mainAdminLoginForm");
+const demoBuyerLogin = document.querySelector("#demoBuyerLogin");
+const logoutSession = document.querySelector("#logoutSession");
+const roleLabel = document.querySelector("#roleLabel");
+const topEyebrow = document.querySelector("#topEyebrow");
+const pageTitle = document.querySelector("#pageTitle");
+const pageSubtitle = document.querySelector("#pageSubtitle");
 const productGrid = document.querySelector("#productGrid");
 const productSummary = document.querySelector("#productSummary");
 const categoryTabs = document.querySelector("#categoryTabs");
@@ -126,10 +657,283 @@ const cartDialog = document.querySelector("#cartDialog");
 const ordersList = document.querySelector("#ordersList");
 const adminOrders = document.querySelector("#adminOrders");
 const adminProducts = document.querySelector("#adminProducts");
+const adminStats = document.querySelector("#adminStats");
 const toast = document.querySelector("#toast");
+const loginView = document.querySelector("#loginView");
+const adminPanel = document.querySelector("#adminPanel");
+const adminLoginForm = document.querySelector("#adminLoginForm");
+const logoutAdmin = document.querySelector("#logoutAdmin");
+const profileForm = document.querySelector("#profileForm");
+const checkoutName = document.querySelector("#checkoutName");
+const checkoutPhone = document.querySelector("#checkoutPhone");
+const storeOpenLabel = document.querySelector("#storeOpenLabel");
+const storeHoursLabel = document.querySelector("#storeHoursLabel");
+const storeHoursForm = document.querySelector("#storeHoursForm");
+const storeOpenTime = document.querySelector("#storeOpenTime");
+const storeCloseTime = document.querySelector("#storeCloseTime");
+const profileShortcut = document.querySelector("#profileShortcut");
+const sidebarProfilePhoto = document.querySelector("#sidebarProfilePhoto");
+const sidebarProfileName = document.querySelector("#sidebarProfileName");
+const profilePhotoPreview = document.querySelector("#profilePhotoPreview");
+const profilePhotoInput = document.querySelector("#profilePhotoInput");
+const photoHistory = document.querySelector("#photoHistory");
+
+function loadSavedData() {
+  const savedOrders = JSON.parse(localStorage.getItem(storageKeys.orders) || "null");
+  const savedStocks = JSON.parse(localStorage.getItem(storageKeys.productStocks) || "null");
+  const savedBuyers = JSON.parse(localStorage.getItem(storageKeys.buyers) || "null");
+  const savedSession = JSON.parse(localStorage.getItem(storageKeys.currentSession) || "null");
+  const savedStoreHours = JSON.parse(localStorage.getItem(storageKeys.storeHours) || "null");
+
+  if (Array.isArray(savedOrders)) {
+    orders = savedOrders;
+  }
+
+  buyers = Array.isArray(savedBuyers) ? savedBuyers : [];
+  if (!buyers.some((buyer) => buyer.email === demoBuyer.email)) {
+    buyers.unshift({ ...demoBuyer });
+  }
+  buyers = buyers.map((buyer) => ({
+    ...buyer,
+    photo: buyer.photo || "logo.png",
+    photoHistory: Array.isArray(buyer.photoHistory) ? buyer.photoHistory : [],
+  }));
+  saveBuyers();
+
+  if (savedSession && typeof savedSession === "object") {
+    currentSession = savedSession;
+  } else if (localStorage.getItem(storageKeys.adminLoggedIn) === "true") {
+    currentSession = { role: "admin", name: "Admin" };
+  }
+
+  if (savedStocks && typeof savedStocks === "object") {
+    products.forEach((product) => {
+      if (Number.isFinite(savedStocks[product.id])) {
+        product.stock = savedStocks[product.id];
+      }
+    });
+  }
+
+  if (savedStoreHours?.open && savedStoreHours?.close) {
+    storeHours = savedStoreHours;
+  }
+}
+
+function saveBuyers() {
+  localStorage.setItem(storageKeys.buyers, JSON.stringify(buyers));
+}
+
+function saveSession() {
+  if (currentSession) {
+    localStorage.setItem(storageKeys.currentSession, JSON.stringify(currentSession));
+    return;
+  }
+  localStorage.removeItem(storageKeys.currentSession);
+}
+
+function saveOrders() {
+  localStorage.setItem(storageKeys.orders, JSON.stringify(orders));
+}
+
+function saveStocks() {
+  const stocks = products.reduce((result, product) => {
+    result[product.id] = product.stock;
+    return result;
+  }, {});
+  localStorage.setItem(storageKeys.productStocks, JSON.stringify(stocks));
+}
+
+function saveStoreHours() {
+  localStorage.setItem(storageKeys.storeHours, JSON.stringify(storeHours));
+}
 
 function formatPrice(value) {
   return currency.format(value).replace(/\s/g, "");
+}
+
+function formatClock(value) {
+  return value.replace(":", ".");
+}
+
+function currentBuyer() {
+  if (currentSession?.role !== "buyer") return null;
+  return buyers.find((buyer) => buyer.id === currentSession.id) || null;
+}
+
+function switchAuthTab(tabName) {
+  authTabs.forEach((tab) => {
+    tab.classList.toggle("active", tab.dataset.authTab === tabName);
+  });
+  authPanels.forEach((panel) => {
+    panel.classList.toggle("active", panel.dataset.authPanel === tabName);
+  });
+}
+
+function switchAdminPage(pageName) {
+  adminTabs.forEach((tab) => {
+    tab.classList.toggle("active", tab.dataset.adminPage === pageName);
+  });
+  adminPages.forEach((page) => {
+    page.classList.toggle("active", page.id === `admin${pageName[0].toUpperCase()}${pageName.slice(1)}Page`);
+  });
+
+  const titles = {
+    stats: ["Dashboard Admin", "Statistika Penjualan", "Pantau pemasukan dan jam buka toko."],
+    orders: ["Dashboard Admin", "Pesanan Masuk", "Kelola status pesanan pembeli."],
+    products: ["Dashboard Admin", "Produk Toko", "Atur stok dan pantau menu."],
+  };
+  const [eyebrow, title, subtitle] = titles[pageName] || titles.stats;
+  if (topEyebrow) topEyebrow.textContent = eyebrow;
+  if (pageTitle) pageTitle.textContent = title;
+  if (pageSubtitle) pageSubtitle.textContent = subtitle;
+}
+
+function setSession(session) {
+  currentSession = session;
+  if (session?.role === "admin") {
+    localStorage.setItem(storageKeys.adminLoggedIn, "true");
+  } else {
+    localStorage.removeItem(storageKeys.adminLoggedIn);
+  }
+  saveSession();
+  applySession();
+}
+
+function applySession() {
+  const isLoggedIn = Boolean(currentSession);
+  const isAdmin = currentSession?.role === "admin";
+  const isBuyer = currentSession?.role === "buyer";
+
+  if (authScreen) authScreen.hidden = isLoggedIn;
+  if (appShell) appShell.hidden = !isLoggedIn;
+
+  document.querySelectorAll(".buyer-only").forEach((element) => {
+    element.hidden = !isBuyer;
+  });
+  document.querySelectorAll(".admin-only").forEach((element) => {
+    element.hidden = !isAdmin;
+  });
+
+  if (roleLabel) roleLabel.textContent = isAdmin ? "Admin Area" : "Fresh Bread everyday";
+
+  if (!isLoggedIn) {
+    cart = [];
+    renderCart();
+    return;
+  }
+
+  if (isAdmin) {
+    switchView("admin");
+  } else {
+    switchView("shop");
+  }
+
+  fillProfileForm();
+  renderCheckoutProfile();
+  renderAll();
+}
+
+function loginBuyer(email, password) {
+  const normalizedEmail = email.trim().toLowerCase();
+  const buyer = buyers.find((item) => item.email.toLowerCase() === normalizedEmail);
+
+  if (!buyer) {
+    showToast("Email belum terdaftar. Buat akun dulu ya.");
+    return;
+  }
+
+  if (buyer.password !== password) {
+    showToast("Password untuk email ini belum cocok.");
+    return;
+  }
+
+  setSession({ role: "buyer", id: buyer.id, name: buyer.name });
+  showToast(`Selamat datang, ${buyer.name}.`);
+}
+
+function registerBuyer(formData) {
+  const email = formData.email.trim().toLowerCase();
+  if (buyers.some((buyer) => buyer.email.toLowerCase() === email)) {
+    showToast("Email sudah terdaftar, coba login ya.");
+    return;
+  }
+
+  const buyer = {
+    id: `buyer-${Date.now()}`,
+    name: formData.name.trim(),
+    phone: formData.phone.trim(),
+    email,
+    password: formData.password,
+    address: "",
+    photo: "logo.png",
+    photoHistory: [],
+  };
+
+  buyers.unshift(buyer);
+  saveBuyers();
+  setSession({ role: "buyer", id: buyer.id, name: buyer.name });
+  showToast("Akun pembeli berhasil dibuat.");
+}
+
+function loginAdmin(username, password) {
+  if (username === "admin" && password === "admin123") {
+    setSession({ role: "admin", name: "Admin" });
+    showToast("Login admin berhasil.");
+    return true;
+  }
+
+  showToast("Username atau password admin salah.");
+  return false;
+}
+
+function fillProfileForm() {
+  const buyer = currentBuyer();
+  if (!profileForm || !buyer) return;
+  document.querySelector("#profileName").value = buyer.name || "";
+  document.querySelector("#profileEmail").value = buyer.email || "";
+  document.querySelector("#profilePhone").value = buyer.phone || "";
+  document.querySelector("#profileAddress").value = buyer.address || "";
+  renderProfilePhoto();
+}
+
+function renderCheckoutProfile() {
+  const buyer = currentBuyer();
+  if (!checkoutName || !checkoutPhone) return;
+  checkoutName.textContent = buyer?.name || "Pembeli";
+  checkoutPhone.textContent = buyer?.phone || "Nomor HP belum diisi";
+}
+
+function renderProfilePhoto() {
+  const buyer = currentBuyer();
+  const photo = buyer?.photo || "logo.png";
+  if (sidebarProfilePhoto) sidebarProfilePhoto.src = photo;
+  if (sidebarProfileName) sidebarProfileName.textContent = buyer?.name || "Profil";
+  if (profilePhotoPreview) profilePhotoPreview.src = photo;
+
+  if (!photoHistory) return;
+  const history = buyer?.photoHistory || [];
+  if (!history.length) {
+    photoHistory.innerHTML = `<span class="empty-photo-history">Belum ada foto lama.</span>`;
+    return;
+  }
+
+  photoHistory.innerHTML = history
+    .map(
+      (item, index) => `
+        <button class="history-photo ${item === photo ? "active" : ""}" data-photo-index="${index}" type="button">
+          <img src="${item}" alt="Foto profil lama ${index + 1}">
+        </button>
+      `,
+    )
+    .join("");
+}
+
+function renderStoreHours() {
+  const hoursText = `${formatClock(storeHours.open)} - ${formatClock(storeHours.close)} WIB`;
+  if (storeOpenLabel) storeOpenLabel.textContent = "Buka Hari Ini";
+  if (storeHoursLabel) storeHoursLabel.textContent = hoursText;
+  if (storeOpenTime) storeOpenTime.value = storeHours.open;
+  if (storeCloseTime) storeCloseTime.value = storeHours.close;
 }
 
 function productSvg(product) {
@@ -158,6 +962,7 @@ function stockLabel(stock) {
 }
 
 function renderCategories() {
+  if (!categoryTabs) return;
   const categories = ["Semua", ...new Set(products.map((product) => product.category))];
   categoryTabs.innerHTML = categories
     .map(
@@ -173,12 +978,14 @@ function renderCategories() {
 function filteredProducts() {
   return products.filter((product) => {
     const matchesCategory = selectedCategory === "Semua" || product.category === selectedCategory;
-    const haystack = `${product.name} ${product.category} ${product.description}`.toLowerCase();
+    const categoryTags = categorySearchTags[product.category] || "";
+    const haystack = `${product.name} ${product.category} ${product.label || ""} ${categoryTags} ${product.description}`.toLowerCase();
     return matchesCategory && haystack.includes(searchTerm.toLowerCase());
   });
 }
 
 function renderProducts() {
+  if (!productGrid || !productSummary) return;
   const visibleProducts = filteredProducts();
   productSummary.textContent = `${visibleProducts.length} produk cocok dengan pilihan saat ini.`;
   productGrid.innerHTML = visibleProducts
@@ -195,7 +1002,7 @@ function renderProducts() {
               <p>${product.description}</p>
             </div>
             <div class="product-meta">
-              <span>${product.category}</span>
+              <span>${product.category}${product.label ? ` • ${product.label}` : ""}</span>
               <span class="status-pill ${stock.className}">${stock.text}</span>
             </div>
             <div class="product-meta">
@@ -224,6 +1031,7 @@ function cartValue() {
 }
 
 function renderCart() {
+  if (!cartCount || !cartTotal || !cartItems) return;
   cartCount.textContent = cartQuantity();
   cartTotal.textContent = formatPrice(cartValue());
 
@@ -298,15 +1106,30 @@ function changeQuantity(productId, delta) {
 }
 
 function renderOrders() {
+  if (!ordersList && !adminOrders) return;
+
+  const buyer = currentBuyer();
+  const buyerOrders = buyer
+    ? orders.filter(
+        (order) =>
+          order.buyerId === buyer.id ||
+          String(order.customer).toLowerCase() === buyer.name.toLowerCase(),
+      )
+    : orders;
+
   if (!orders.length) {
-    ordersList.innerHTML = `<div class="empty-state">Belum ada riwayat pesanan.</div>`;
-    adminOrders.innerHTML = `<div class="empty-state">Belum ada pesanan masuk.</div>`;
+    if (ordersList) ordersList.innerHTML = `<div class="empty-state">Belum ada riwayat pesanan.</div>`;
+    if (adminOrders) adminOrders.innerHTML = `<div class="empty-state">Belum ada pesanan masuk.</div>`;
     return;
   }
 
-  const orderCards = orders
-    .map(
-      (order) => `
+  if (ordersList) {
+    if (!buyerOrders.length) {
+      ordersList.innerHTML = `<div class="empty-state">Belum ada riwayat pesanan untuk akun ini.</div>`;
+    } else {
+      ordersList.innerHTML = buyerOrders
+      .map(
+        (order) => `
         <article class="order-card">
           <div class="order-meta">
             <div>
@@ -324,13 +1147,15 @@ function renderOrders() {
           </div>
         </article>
       `,
-    )
-    .join("");
+      )
+      .join("");
+    }
+  }
 
-  ordersList.innerHTML = orderCards;
-  adminOrders.innerHTML = orders
-    .map(
-      (order) => `
+  if (adminOrders) {
+    adminOrders.innerHTML = orders
+      .map(
+        (order) => `
         <article class="admin-card">
           <div class="admin-card-header">
             <div>
@@ -340,6 +1165,13 @@ function renderOrders() {
             <span class="status-pill">${order.status}</span>
           </div>
           <p>${order.fulfillment}${order.note ? ` • ${order.note}` : ""}</p>
+          <ul class="order-items">
+            ${order.items.map((item) => `<li>${item.quantity}x ${item.name} - ${formatPrice(item.price * item.quantity)}</li>`).join("")}
+          </ul>
+          <div class="cart-total">
+            <span>Total</span>
+            <strong>${formatPrice(order.total)}</strong>
+          </div>
           <div class="admin-actions">
             ${statusFlow
               .map(
@@ -352,34 +1184,46 @@ function renderOrders() {
                 `,
               )
               .join("")}
+            <button class="primary-button" data-print="${order.id}" type="button">
+              Cetak Struk
+            </button>
           </div>
         </article>
       `,
-    )
-    .join("");
+      )
+      .join("");
+  }
 }
 
 function renderAdminProducts() {
+  if (!adminProducts) return;
   adminProducts.innerHTML = products
     .map((product) => {
       const stock = stockLabel(product.stock);
       return `
-        <article class="admin-card">
-          <div class="admin-card-header">
-            <div>
-              <h3>${product.name}</h3>
-              <p>${product.category} • ${formatPrice(product.price)}</p>
-            </div>
-            <span class="status-pill ${stock.className}">${stock.text}</span>
+        <article class="product-card admin-product-card">
+          <div class="product-image">
+            <img src="${product.image}" alt="${product.name}">
           </div>
-          <div class="stock-control">
-            <label>
-              Stok
-              <input type="number" min="0" value="${product.stock}" data-stock="${product.id}" />
-            </label>
-            <button class="secondary-button" data-toggle="${product.id}" type="button">
-              ${product.stock > 0 ? "Kosongkan" : "Aktifkan"}
-            </button>
+          <div class="product-body">
+            <div class="product-info">
+                <h3>${product.name}</h3>
+                <p>${product.description}</p>
+            </div>
+            <div class="product-meta">
+              <span>${product.category}${product.label ? ` • ${product.label}` : ""}</span>
+              <span class="status-pill ${stock.className}">${stock.text}</span>
+            </div>
+            <strong class="price">${formatPrice(product.price)}</strong>
+            <div class="stock-control">
+              <label>
+                Stok
+                <input type="number" min="0" value="${product.stock}" data-stock="${product.id}" />
+              </label>
+              <button class="secondary-button" data-toggle="${product.id}" type="button">
+                ${product.stock > 0 ? "Kosongkan" : "Aktifkan"}
+              </button>
+            </div>
           </div>
         </article>
       `;
@@ -387,17 +1231,81 @@ function renderAdminProducts() {
     .join("");
 }
 
+function renderAdminStats() {
+  if (!adminStats) return;
+  const now = new Date();
+  const currentMonth = now.toISOString().slice(0, 7);
+  const monthFormatter = new Intl.DateTimeFormat("id-ID", {
+    month: "long",
+    year: "numeric",
+  });
+  const monthlyOrders = orders.filter((order) => {
+    const orderDate = order.createdAt || `20${String(order.id).slice(3, 9).replace(/(\d{2})(\d{2})(\d{2})/, "$1-$2-$3")}`;
+    return String(orderDate).slice(0, 7) === currentMonth;
+  });
+  const revenue = orders.reduce((sum, order) => sum + order.total, 0);
+  const monthlyRevenue = monthlyOrders.reduce((sum, order) => sum + order.total, 0);
+  const soldItems = orders.reduce(
+    (sum, order) => sum + order.items.reduce((total, item) => total + item.quantity, 0),
+    0,
+  );
+  const lowStock = products.filter((product) => product.stock <= 5).length;
+  const bestSeller = orders
+    .flatMap((order) => order.items)
+    .reduce((result, item) => {
+      result[item.name] = (result[item.name] || 0) + item.quantity;
+      return result;
+    }, {});
+  const bestSellerName = Object.entries(bestSeller).sort((a, b) => b[1] - a[1])[0]?.[0] || "Belum ada";
+
+  adminStats.innerHTML = `
+    <article class="stat-card monthly">
+      <span>Pemasukan ${monthFormatter.format(now)}</span>
+      <strong>${formatPrice(monthlyRevenue)}</strong>
+      <small>${monthlyOrders.length} pesanan bulan ini</small>
+    </article>
+    <article class="stat-card">
+      <span>Total Pemasukan</span>
+      <strong>${formatPrice(revenue)}</strong>
+    </article>
+    <article class="stat-card">
+      <span>Pesanan</span>
+      <strong>${orders.length}</strong>
+    </article>
+    <article class="stat-card">
+      <span>Produk Terjual</span>
+      <strong>${soldItems}</strong>
+    </article>
+    <article class="stat-card">
+      <span>Stok Rendah</span>
+      <strong>${lowStock}</strong>
+    </article>
+    <article class="stat-card wide">
+      <span>Produk Paling Laris</span>
+      <strong>${bestSellerName}</strong>
+    </article>
+  `;
+}
+
 function submitOrder(event) {
   event.preventDefault();
+  const buyer = currentBuyer();
+  if (!buyer) {
+    showToast("Login sebagai pembeli dulu sebelum checkout.");
+    return;
+  }
+
   if (!cart.length) {
     showToast("Tambahkan produk dulu sebelum checkout.");
     return;
   }
 
   const order = {
-    id: `TR-260703-${String(orders.length + 1).padStart(3, "0")}`,
-    customer: document.querySelector("#customerName").value.trim(),
-    phone: document.querySelector("#customerPhone").value.trim(),
+    id: `TR-${new Date().toISOString().slice(2, 10).replace(/-/g, "")}-${String(orders.length + 1).padStart(3, "0")}`,
+    createdAt: new Date().toISOString(),
+    buyerId: buyer.id,
+    customer: buyer.name,
+    phone: buyer.phone,
     fulfillment: document.querySelector("#fulfillment").value,
     payment: document.querySelector("#paymentMethod").value,
     note: document.querySelector("#orderNote").value.trim(),
@@ -412,6 +1320,8 @@ function submitOrder(event) {
   });
 
   orders.unshift(order);
+  saveOrders();
+  saveStocks();
   cart = [];
   cartDialog.close();
   renderAll();
@@ -426,10 +1336,27 @@ function switchView(viewName) {
   document.querySelectorAll(".view").forEach((view) => {
     view.classList.toggle("active", view.id === `${viewName}View`);
   });
+
+  if (viewName === "admin") {
+    switchAdminPage("stats");
+    return;
+  }
+
+  const titles = {
+    shop: ["Freshly Baked Everyday", "Freshly Baked Happiness", "Bakery • Drinks • Desserts"],
+    orders: ["Pesanan Pembeli", "Riwayat Pesanan", "Pantau status pesanan dari akun kamu."],
+    profile: ["Profil Pembeli", "Data Akun", "Ubah nama, nomor HP, email, dan alamat."],
+    admin: ["Dashboard Admin", "Statistika Penjualan", "Kelola pesanan, stok, dan produk toko."],
+  };
+  const [eyebrow, title, subtitle] = titles[viewName] || titles.shop;
+  if (topEyebrow) topEyebrow.textContent = eyebrow;
+  if (pageTitle) pageTitle.textContent = title;
+  if (pageSubtitle) pageSubtitle.textContent = subtitle;
 }
 
 let toastTimer;
 function showToast(message) {
+  if (!toast) return;
   toast.textContent = message;
   toast.classList.add("show");
   clearTimeout(toastTimer);
@@ -442,14 +1369,221 @@ function renderAll() {
   renderCart();
   renderOrders();
   renderAdminProducts();
+  renderAdminStats();
+  renderCheckoutProfile();
+  renderStoreHours();
+  renderProfilePhoto();
 }
 
-document.querySelector("#searchInput").addEventListener("input", (event) => {
+function printReceipt(orderId) {
+  const order = orders.find((item) => item.id === orderId);
+  if (!order) return;
+
+  const receiptItems = order.items
+    .map(
+      (item) => `
+        <tr>
+          <td>${item.quantity}x ${item.name}</td>
+          <td>${formatPrice(item.price * item.quantity)}</td>
+        </tr>
+      `,
+    )
+    .join("");
+
+  const receiptWindow = window.open("", "_blank", "width=420,height=640");
+  receiptWindow.document.write(`
+    <!doctype html>
+    <html lang="id">
+      <head>
+        <meta charset="utf-8">
+        <title>Struk ${order.id}</title>
+        <style>
+          body { width: 320px; margin: 0 auto; padding: 20px; color: #211c18; font-family: Arial, sans-serif; }
+          h1, h2, p { margin: 0; }
+          h1 { font-size: 20px; text-align: center; }
+          h2 { margin-top: 8px; font-size: 14px; text-align: center; font-weight: 400; }
+          .meta { margin: 18px 0; border-top: 1px dashed #999; border-bottom: 1px dashed #999; padding: 12px 0; font-size: 13px; }
+          table { width: 100%; border-collapse: collapse; font-size: 13px; }
+          td { padding: 6px 0; vertical-align: top; }
+          td:last-child { text-align: right; }
+          .total { margin-top: 12px; border-top: 1px dashed #999; padding-top: 10px; display: flex; justify-content: space-between; font-size: 16px; font-weight: 700; }
+          .thanks { margin-top: 18px; text-align: center; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <h1>serenyt Bakery</h1>
+        <h2>Struk Pembelian</h2>
+        <div class="meta">
+          <p>No: ${order.id}</p>
+          <p>Nama: ${order.customer}</p>
+          <p>HP: ${order.phone}</p>
+          <p>Ambil: ${order.fulfillment}</p>
+          <p>Bayar: ${order.payment}</p>
+          <p>Status: ${order.status}</p>
+        </div>
+        <table>${receiptItems}</table>
+        <div class="total"><span>Total</span><span>${formatPrice(order.total)}</span></div>
+        ${order.note ? `<p class="thanks">Catatan: ${order.note}</p>` : ""}
+        <p class="thanks">Terima kasih sudah berbelanja.</p>
+        <script>window.print();<\/script>
+      </body>
+    </html>
+  `);
+  receiptWindow.document.close();
+}
+
+function syncAdminAccess() {
+  if (!loginView || !adminPanel) return;
+  const isLoggedIn = localStorage.getItem(storageKeys.adminLoggedIn) === "true";
+  loginView.hidden = isLoggedIn;
+  adminPanel.hidden = !isLoggedIn;
+  if (logoutAdmin) logoutAdmin.hidden = !isLoggedIn;
+}
+
+authTabs.forEach((tab) => {
+  tab.addEventListener("click", () => switchAuthTab(tab.dataset.authTab));
+});
+
+adminTabs.forEach((tab) => {
+  tab.addEventListener("click", () => switchAdminPage(tab.dataset.adminPage));
+});
+
+document.querySelectorAll("[data-toggle-password]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const input = document.querySelector(`#${button.dataset.togglePassword}`);
+    if (!input) return;
+    const shouldShow = input.type === "password";
+    input.type = shouldShow ? "text" : "password";
+    button.textContent = shouldShow ? "Tutup" : "Lihat";
+  });
+});
+
+buyerLoginForm?.addEventListener("submit", (event) => {
+  event.preventDefault();
+  loginBuyer(
+    document.querySelector("#buyerLoginEmail").value.trim(),
+    document.querySelector("#buyerLoginPassword").value,
+  );
+  buyerLoginForm.reset();
+});
+
+demoBuyerLogin?.addEventListener("click", () => {
+  loginBuyer(demoBuyer.email, demoBuyer.password);
+});
+
+buyerRegisterForm?.addEventListener("submit", (event) => {
+  event.preventDefault();
+  registerBuyer({
+    name: document.querySelector("#registerName").value,
+    phone: document.querySelector("#registerPhone").value,
+    email: document.querySelector("#registerEmail").value,
+    password: document.querySelector("#registerPassword").value,
+  });
+  buyerRegisterForm.reset();
+});
+
+mainAdminLoginForm?.addEventListener("submit", (event) => {
+  event.preventDefault();
+  loginAdmin(
+    document.querySelector("#mainAdminUsername").value.trim(),
+    document.querySelector("#mainAdminPassword").value.trim(),
+  );
+  mainAdminLoginForm.reset();
+});
+
+profileForm?.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const buyer = currentBuyer();
+  if (!buyer) return;
+
+  const nextEmail = document.querySelector("#profileEmail").value.trim().toLowerCase();
+  const emailUsed = buyers.some((item) => item.id !== buyer.id && item.email.toLowerCase() === nextEmail);
+  if (emailUsed) {
+    showToast("Email itu sudah dipakai akun lain.");
+    return;
+  }
+
+  buyer.name = document.querySelector("#profileName").value.trim();
+  buyer.email = nextEmail;
+  buyer.phone = document.querySelector("#profilePhone").value.trim();
+  buyer.address = document.querySelector("#profileAddress").value.trim();
+  currentSession.name = buyer.name;
+  saveBuyers();
+  saveSession();
+  renderProfilePhoto();
+  renderCheckoutProfile();
+  showToast("Profil berhasil diperbarui.");
+});
+
+profileShortcut?.addEventListener("click", () => {
+  if (currentSession?.role === "buyer") switchView("profile");
+});
+
+profilePhotoInput?.addEventListener("change", (event) => {
+  const buyer = currentBuyer();
+  const file = event.target.files?.[0];
+  if (!buyer || !file) return;
+
+  const reader = new FileReader();
+  reader.addEventListener("load", () => {
+    const nextPhoto = String(reader.result);
+    const history = buyer.photoHistory || [];
+    buyer.photoHistory = buyer.photo
+      ? [buyer.photo, ...history.filter((item) => item !== buyer.photo && item !== nextPhoto)].slice(0, 8)
+      : history;
+    buyer.photo = nextPhoto;
+    saveBuyers();
+    renderProfilePhoto();
+    showToast("Foto profil berhasil diganti.");
+  });
+  reader.readAsDataURL(file);
+  profilePhotoInput.value = "";
+});
+
+photoHistory?.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-photo-index]");
+  const buyer = currentBuyer();
+  if (!button || !buyer) return;
+
+  const selected = buyer.photoHistory?.[Number(button.dataset.photoIndex)];
+  if (!selected) return;
+
+  const previous = buyer.photo;
+  buyer.photo = selected;
+  buyer.photoHistory = previous
+    ? [previous, ...buyer.photoHistory.filter((item) => item !== selected && item !== previous)].slice(0, 8)
+    : buyer.photoHistory.filter((item) => item !== selected);
+  saveBuyers();
+  renderProfilePhoto();
+  showToast("Foto profil lama dipakai lagi.");
+});
+
+storeHoursForm?.addEventListener("submit", (event) => {
+  event.preventDefault();
+  storeHours = {
+    open: storeOpenTime.value,
+    close: storeCloseTime.value,
+  };
+  saveStoreHours();
+  renderStoreHours();
+  showToast("Jam buka toko berhasil diperbarui.");
+});
+
+logoutSession?.addEventListener("click", () => {
+  currentSession = null;
+  cart = [];
+  localStorage.removeItem(storageKeys.adminLoggedIn);
+  saveSession();
+  applySession();
+  showToast("Kamu sudah logout.");
+});
+
+document.querySelector("#searchInput")?.addEventListener("input", (event) => {
   searchTerm = event.target.value;
   renderProducts();
 });
 
-categoryTabs.addEventListener("click", (event) => {
+categoryTabs?.addEventListener("click", (event) => {
   const button = event.target.closest("[data-category]");
   if (!button) return;
   selectedCategory = button.dataset.category;
@@ -457,58 +1591,90 @@ categoryTabs.addEventListener("click", (event) => {
   renderProducts();
 });
 
-productGrid.addEventListener("click", (event) => {
+productGrid?.addEventListener("click", (event) => {
   const button = event.target.closest("[data-add]");
   if (button) addToCart(button.dataset.add);
 });
 
-document.querySelector("#addFeatured").addEventListener("click", () => addToCart("morning-box"));
+document.querySelector("#addFeatured")?.addEventListener("click", () => addToCart("classic-bakers-box"));
 
-document.querySelector("#openCart").addEventListener("click", () => {
+document.querySelector("#openCart")?.addEventListener("click", () => {
   renderCart();
   cartDialog.showModal();
 });
 
-cartItems.addEventListener("click", (event) => {
+cartItems?.addEventListener("click", (event) => {
   const increase = event.target.closest("[data-increase]");
   const decrease = event.target.closest("[data-decrease]");
   if (increase) changeQuantity(increase.dataset.increase, 1);
   if (decrease) changeQuantity(decrease.dataset.decrease, -1);
 });
 
-document.querySelector("#checkoutForm").addEventListener("submit", submitOrder);
+document.querySelector("#checkoutForm")?.addEventListener("submit", submitOrder);
 
-document.querySelectorAll(".nav-item").forEach((button) => {
+document.querySelectorAll(".nav-item[data-view]").forEach((button) => {
   button.addEventListener("click", () => switchView(button.dataset.view));
 });
 
-adminOrders.addEventListener("click", (event) => {
+adminOrders?.addEventListener("click", (event) => {
+  const printButton = event.target.closest("[data-print]");
+  if (printButton) {
+    printReceipt(printButton.dataset.print);
+    return;
+  }
+
   const button = event.target.closest("[data-order][data-status]");
   if (!button) return;
   const order = orders.find((item) => item.id === button.dataset.order);
   if (!order) return;
   order.status = button.dataset.status;
+  saveOrders();
   renderOrders();
   showToast(`Status ${order.id} diperbarui.`);
 });
 
-adminProducts.addEventListener("input", (event) => {
+adminProducts?.addEventListener("input", (event) => {
   const input = event.target.closest("[data-stock]");
   if (!input) return;
   const product = products.find((item) => item.id === input.dataset.stock);
   if (!product) return;
   product.stock = Math.max(0, Number(input.value || 0));
+  saveStocks();
   renderProducts();
   renderCart();
 });
 
-adminProducts.addEventListener("click", (event) => {
+adminProducts?.addEventListener("click", (event) => {
   const button = event.target.closest("[data-toggle]");
   if (!button) return;
   const product = products.find((item) => item.id === button.dataset.toggle);
   if (!product) return;
   product.stock = product.stock > 0 ? 0 : 10;
+  saveStocks();
   renderAll();
 });
 
+adminLoginForm?.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const username = document.querySelector("#adminUsername").value.trim();
+  const password = document.querySelector("#adminPassword").value.trim();
+
+  if (loginAdmin(username, password)) {
+    adminLoginForm.reset();
+    syncAdminAccess();
+    renderAll();
+  }
+});
+
+logoutAdmin?.addEventListener("click", () => {
+  currentSession = null;
+  localStorage.removeItem(storageKeys.adminLoggedIn);
+  saveSession();
+  syncAdminAccess();
+  showToast("Admin sudah logout.");
+});
+
+loadSavedData();
+syncAdminAccess();
+applySession();
 renderAll();

@@ -2,430 +2,498 @@
 <html lang="id">
 
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
-
     <title>serenyt Bakery</title>
-
     <link rel="stylesheet"
           href="styles.css">
-
 </head>
 
 <body>
+<section class="auth-screen"
+         id="authScreen">
+    <div class="auth-visual">
+        <img class="store-logo"
+             src="logo.png"
+             alt="Logo serenyt Bakery">
+        <div>
+            <p class="eyebrow">Serenyt Bakery</p>
+            <h1>Freshly Baked Happiness</h1>
+            <p class="hero-desc">Masuk dulu untuk belanja roti, cek pesanan, atau kelola toko.</p>
+        </div>
+    </div>
 
-<div class="app-shell">
-
-    <aside class="sidebar">
-
-        <div class="brand">
-
-            <div class="brand-mark">
-                🥐
-            </div>
-
-            <div>
-
-                <strong>serenyt Bakery</strong>
-
-                <span>Fresh Bread everyday</span>
-
-            </div>
-
+    <div class="auth-card">
+        <div class="auth-tabs">
+            <button class="auth-tab active"
+                    data-auth-tab="login"
+                    type="button">Login</button>
+            <button class="auth-tab"
+                    data-auth-tab="register"
+                    type="button">Buat Akun</button>
         </div>
 
+        <form class="auth-form active"
+              id="buyerLoginForm"
+              data-auth-panel="login">
+            <div>
+                <p class="eyebrow">Pembeli</p>
+                <h2>Masuk Akun</h2>
+            </div>
+            <label>
+                Email
+                <input id="buyerLoginEmail"
+                       type="email"
+                       autocomplete="email"
+                       placeholder="email bebas"
+                       required>
+            </label>
+            <label>
+                Password
+                <span class="password-field">
+                    <input id="buyerLoginPassword"
+                           type="password"
+                           autocomplete="current-password"
+                           placeholder="password bebas"
+                           required>
+                    <button class="password-toggle"
+                            data-toggle-password="buyerLoginPassword"
+                            type="button">Lihat</button>
+                </span>
+            </label>
+            <button class="primary-button full"
+                    type="submit">Masuk sebagai Pembeli</button>
+            <button class="secondary-button full"
+                    id="demoBuyerLogin"
+                    type="button">Coba Akun Demo</button>
+        </form>
+
+        <form class="auth-form"
+              id="buyerRegisterForm"
+              data-auth-panel="register">
+            <div>
+                <p class="eyebrow">Akun Baru</p>
+                <h2>Daftar Pembeli</h2>
+            </div>
+            <div class="form-row">
+                <label>
+                    Nama
+                    <input id="registerName"
+                           type="text"
+                           autocomplete="name"
+                           required>
+                </label>
+                <label>
+                    Nomor HP
+                    <input id="registerPhone"
+                           type="tel"
+                           autocomplete="tel"
+                           required>
+                </label>
+            </div>
+            <label>
+                Email
+                <input id="registerEmail"
+                       type="email"
+                       autocomplete="email"
+                       required>
+            </label>
+            <label>
+                Password
+                <span class="password-field">
+                    <input id="registerPassword"
+                           type="password"
+                           autocomplete="new-password"
+                           minlength="4"
+                           required>
+                    <button class="password-toggle"
+                            data-toggle-password="registerPassword"
+                            type="button">Lihat</button>
+                </span>
+            </label>
+            <button class="primary-button full"
+                    type="submit">Buat Akun</button>
+        </form>
+
+        <form class="admin-login-inline"
+              id="mainAdminLoginForm">
+            <p class="eyebrow">Admin</p>
+            <div class="form-row">
+                <label>
+                    Username
+                    <input id="mainAdminUsername"
+                           type="text"
+                           autocomplete="username"
+                           placeholder="admin"
+                           required>
+                </label>
+                <label>
+                    Password
+                    <span class="password-field">
+                        <input id="mainAdminPassword"
+                               type="password"
+                               autocomplete="current-password"
+                               placeholder="admin123"
+                               required>
+                        <button class="password-toggle"
+                                data-toggle-password="mainAdminPassword"
+                                type="button">Lihat</button>
+                    </span>
+                </label>
+            </div>
+            <button class="secondary-button full"
+                    type="submit">Masuk Admin</button>
+        </form>
+    </div>
+</section>
+
+<div class="app-shell"
+     id="appShell"
+     hidden>
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-mark">
+                <img src="logo.png"
+                     alt="">
+                <span>🥐</span>
+            </div>
+            <div>
+                <strong>serenyt Bakery</strong>
+                <span id="roleLabel">Fresh Bread everyday</span>
+            </div>
+        </div>
+
+        <button class="profile-shortcut buyer-only"
+                id="profileShortcut"
+                type="button">
+            <img id="sidebarProfilePhoto"
+                 src="logo.png"
+                 alt="Foto profil">
+            <span>
+                <strong id="sidebarProfileName">Profil</strong>
+                <small>Lihat akun</small>
+            </span>
+        </button>
+
         <nav class="nav-list">
-
-            <button class="nav-item active"
-                    data-view="shop">
-
+            <button class="nav-item active buyer-only"
+                    data-view="shop"
+                    type="button">
                 🏠
-                Katalog
-
+                <span>Katalog</span>
             </button>
-
-            <button class="nav-item"
-                    data-view="orders">
-
+            <button class="nav-item buyer-only"
+                    data-view="orders"
+                    type="button">
                 📦
-                Pesanan
-
+                <span>Pesanan</span>
             </button>
-
-            <button class="nav-item"
-                    data-view="admin">
-
+            <button class="nav-item buyer-only"
+                    data-view="profile"
+                    type="button">
+                👤
+                <span>Profil</span>
+            </button>
+            <button class="nav-item admin-only"
+                    data-view="admin"
+                    type="button">
                 ⚙️
-                Admin
-
+                <span>Admin</span>
             </button>
-
+            <button class="nav-item"
+                    id="logoutSession"
+                    type="button">
+                ⎋
+                <span>Logout</span>
+            </button>
         </nav>
 
         <div class="store-status">
-
             <span class="status-dot"></span>
-
             <div>
-
-                <strong>Buka Hari Ini</strong>
-
-                <span>07.00 - 21.00 WIB</span>
-
+                <strong id="storeOpenLabel">Buka Hari Ini</strong>
+                <span id="storeHoursLabel">07.00 - 21.00 WIB</span>
             </div>
-
         </div>
-
     </aside>
 
     <main class="main-content">
-
         <header class="topbar">
-
             <div>
-
-                <p class="eyebrow">
-
-                    Freshly Baked Everyday
-
-                </p>
-
-                <h1>
-
-                    Bakery • Drinks • Desserts
-
-                </h1>
+                <p class="eyebrow"
+                   id="topEyebrow">Freshly Baked Everyday</p>
+                <h1 id="pageTitle">Freshly Baked Happiness</h1>
                 <br>
-                <p class="hero-desc">
-
-                    Homemade Bread • Premium Pastry • Fresh Coffee
-
-                </p>
-
+                <p class="hero-desc"
+                   id="pageSubtitle">Bakery • Drinks • Desserts</p>
             </div>
 
-            <button
-                class="cart-button"
-                id="openCart">
-
+            <button class="cart-button buyer-only"
+                    id="openCart"
+                    type="button">
                 🛒
-
                 Keranjang
-
-                <strong id="cartCount">
-
-                    0
-
-                </strong>
-
+                <strong id="cartCount">0</strong>
             </button>
         </header>
 
- <section class="view active" id="shopView">
+        <section class="view active"
+                 id="shopView">
+            <div class="toolbar">
+                <label class="search-box">
+                    🔍
+                    <input id="searchInput"
+                           type="search"
+                           placeholder="Cari roti, pastry, cake, coffee, atau menu favorit...">
+                </label>
 
-    <div class="toolbar">
+                <div class="category-tabs"
+                     id="categoryTabs">
+                </div>
+            </div>
 
-        <label class="search-box">
+            <section class="featured-band">
+                <div class="featured-text">
+                    <p class="eyebrow">Best Seller</p>
+                    <h2>Baker's Box</h2><br>
+                    <p>Biarkan kami menyiapkan kejutan manis untuk Anda, atau pilih sendiri roti favorit yang ingin mengisi Baker's Box.</p>
+                    <br>
+                    <button class="primary-button"
+                            id="addFeatured"
+                            type="button">Order Now</button>
+                </div>
 
-            🔍
+                <div class="featured-visual">
+                    <img src="https://i.pinimg.com/736x/ad/c2/ed/adc2edd4df873d006cf187b37a2cc103.jpg"
+                         alt="Morning Bread Box">
+                </div>
+            </section>
 
-            <input
-                id="searchInput"
-                type="search"
-                placeholder="Cari roti, pastry, cake atau coffee...">
+            <div class="section-title">
+                <h2>Our Menu</h2>
+                <p id="productSummary">Fresh Everyday</p>
+            </div>
 
-        </label>
+            <div class="product-grid"
+                 id="productGrid">
+            </div>
+        </section>
 
-        <div
-            class="category-tabs"
-            id="categoryTabs">
-        </div>
+        <section class="view"
+                 id="ordersView">
+            <div class="section-title">
+                <h2>Riwayat Pesanan</h2>
+                <p>Lihat status pesanan kamu.</p>
+            </div>
 
-    </div>
+            <div id="ordersList"
+                 class="orders-list">
+            </div>
+        </section>
 
-    <section class="featured-band">
+        <section class="view"
+                 id="profileView">
+            <div class="profile-layout">
+                <section class="profile-photo-card">
+                    <div class="profile-photo-preview">
+                        <img id="profilePhotoPreview"
+                             src="logo.png"
+                             alt="Foto profil pembeli">
+                    </div>
+                    <label>
+                        Ganti Foto Profil
+                        <input id="profilePhotoInput"
+                               type="file"
+                               accept="image/*">
+                    </label>
+                    <div>
+                        <p class="eyebrow">History Foto</p>
+                        <div class="photo-history"
+                             id="photoHistory">
+                        </div>
+                    </div>
+                </section>
 
-        <div class="featured-text">
+                <form class="profile-card"
+                      id="profileForm">
+                    <div>
+                        <p class="eyebrow">Profil Pembeli</p>
+                        <h2>Ubah Data Akun</h2>
+                    </div>
+                    <label>
+                        Nama
+                        <input id="profileName"
+                               type="text"
+                               autocomplete="name"
+                               required>
+                    </label>
+                    <label>
+                        Email
+                        <input id="profileEmail"
+                               type="email"
+                               autocomplete="email"
+                               required>
+                    </label>
+                    <label>
+                        Nomor HP
+                        <input id="profilePhone"
+                               type="tel"
+                               autocomplete="tel"
+                               required>
+                    </label>
+                    <label>
+                        Alamat
+                        <textarea id="profileAddress"
+                                  rows="3"
+                                  placeholder="Alamat untuk delivery"></textarea>
+                    </label>
+                    <button class="primary-button"
+                            type="submit">Simpan Profil</button>
+                </form>
+            </div>
+        </section>
 
-            <p class="eyebrow">
-                BEST SELLER
-            </p>
+        <section class="view"
+                 id="adminView">
+            <div class="admin-tabs">
+                <button class="admin-tab active"
+                        data-admin-page="stats"
+                        type="button">Statistik</button>
+                <button class="admin-tab"
+                        data-admin-page="orders"
+                        type="button">Pesanan Masuk</button>
+                <button class="admin-tab"
+                        data-admin-page="products"
+                        type="button">Produk</button>
+            </div>
 
-            <h2>
-                Baker's Box
-            </h2>
+            <section class="admin-page active"
+                     id="adminStatsPage">
+                <div class="section-title">
+                    <h2>Statistik Penjualan</h2>
+                    <p>Pemasukan, stok rendah, dan jam buka toko.</p>
+                </div>
 
-            <p>
+                <div class="stats-grid"
+                     id="adminStats">
+                </div>
 
-                Nikmati Baker's Box berisi 7 pilihan roti dan pastry,
-                terdiri dari 4 pilihan Baker dan
-                3 menu favorit yang dapat Anda pilih sendiri.
+                <form class="store-hours-card"
+                      id="storeHoursForm">
+                    <div>
+                        <p class="eyebrow">Jam Operasional</p>
+                        <h2>Atur Jam Buka Toko</h2>
+                    </div>
+                    <div class="form-row">
+                        <label>
+                            Jam Buka
+                            <input id="storeOpenTime"
+                                   type="time"
+                                   required>
+                        </label>
+                        <label>
+                            Jam Tutup
+                            <input id="storeCloseTime"
+                                   type="time"
+                                   required>
+                        </label>
+                    </div>
+                    <button class="primary-button"
+                            type="submit">Simpan Jam</button>
+                </form>
+            </section>
 
-            </p>
-            <br>
-            <button
-                class="primary-button"
-                id="addFeatured">
+            <section class="admin-page"
+                     id="adminOrdersPage">
+                <div class="section-title">
+                    <h2>Pesanan Masuk</h2>
+                    <p>Ubah status atau cetak struk.</p>
+                </div>
 
-                Order Now
+                <div id="adminOrders"
+                     class="admin-orders">
+                </div>
+            </section>
 
-            </button>
+            <section class="admin-page"
+                     id="adminProductsPage">
+                <div class="section-title">
+                    <h2>Produk</h2>
+                    <p>Atur stok dan pantau menu.</p>
+                </div>
 
-        </div>
-
-        <div class="featured-visual">
-
-            <img
-                src="https://i.pinimg.com/736x/ad/c2/ed/adc2edd4df873d006cf187b37a2cc103.jpg"
-                alt="Morning Bread Box">
-
-        </div>
-
-    </section>
-
-    <div class="section-title">
-
-        <h2>
-
-            Our Menu
-
-        </h2>
-
-        <p id="productSummary">
-
-            Fresh Everyday
-
-        </p>
-
-    </div>
-
-    <div
-        class="product-grid"
-        id="productGrid">
-
-    </div>
-
-</section>
-
-<section
-class="view"
-id="ordersView">
-
-<div class="section-title">
-
-<h2>Riwayat Pesanan</h2>
-
-<p>
-Lihat status pesanan kamu.
-</p>
-
+                <div id="adminProducts"
+                     class="admin-products">
+                </div>
+            </section>
+        </section>
+    </main>
 </div>
 
-<div
-id="ordersList"
-class="orders-list">
-
-</div>
-
-</section>
-
-<section
-class="view"
-id="adminView">
-
-<div class="admin-layout">
-
-<section>
-
-<div class="section-title">
-
-<h2>
-Pesanan Masuk
-</h2>
-
-</div>
-
-<div
-id="adminOrders"
-class="admin-orders">
-
-</div>
-
-</section>
-
-<section>
-
-<div class="section-title">
-
-<h2>
-Produk
-</h2>
-
-</div>
-
-<div
-id="adminProducts"
-class="admin-products">
-
-</div>
-
-</section>
-
-</div>
-
-</section>
-
-</main>
-
-</div>
-<dialog class="cart-drawer" id="cartDialog">
-
-    <form method="dialog" class="drawer-header">
-
+<dialog class="cart-drawer"
+        id="cartDialog">
+    <form method="dialog"
+          class="drawer-header">
         <div>
-
-            <p class="eyebrow">
-                Checkout
-            </p>
-
-            <h2>
-                Keranjang Belanja
-            </h2>
-
+            <p class="eyebrow">Checkout</p>
+            <h2>Keranjang Belanja</h2>
         </div>
 
-        <button
-            class="icon-button"
-            type="submit">
-
-            ✕
-
-        </button>
-
+        <button class="icon-button"
+                type="submit">x</button>
     </form>
 
-    <div
-        class="cart-items"
-        id="cartItems">
-
+    <div class="cart-items"
+         id="cartItems">
     </div>
 
-    <form
-        class="checkout-form"
-        id="checkoutForm">
-
-        <div class="form-row">
-
-            <label>
-
-                Nama
-
-                <input
-                    id="customerName"
-                    type="text"
-                    required>
-
-            </label>
-
-            <label>
-
-                Nomor HP
-
-                <input
-                    id="customerPhone"
-                    type="tel"
-                    required>
-
-            </label>
-
+    <form class="checkout-form"
+          id="checkoutForm">
+        <div class="checkout-profile">
+            <strong id="checkoutName">Pembeli</strong>
+            <span id="checkoutPhone">Nomor HP belum diisi</span>
         </div>
 
         <label>
-
             Metode Pengambilan
-
             <select id="fulfillment">
-
-                <option>
-                    Ambil di Toko
-                </option>
-
-                <option>
-                    Delivery
-                </option>
-
+                <option>Ambil di Toko</option>
+                <option>Delivery</option>
             </select>
-
         </label>
 
         <label>
-
             Catatan
-
-            <textarea
-                id="orderNote"
-                rows="3"
-                placeholder="Tambahkan catatan..."></textarea>
-
+            <textarea id="orderNote"
+                      rows="3"
+                      placeholder="Tambahkan catatan..."></textarea>
         </label>
 
         <label>
-
             Pembayaran
-
             <select id="paymentMethod">
-
-                <option>
-                    Cash
-                </option>
-
-                <option>
-                    Transfer
-                </option>
-
-                <option>
-                    E-Wallet
-                </option>
-
+                <option>Cash</option>
+                <option>Transfer</option>
+                <option>E-Wallet</option>
             </select>
-
         </label>
 
         <div class="cart-total">
-
             <span>Total</span>
-
-            <strong id="cartTotal">
-
-                Rp0
-
-            </strong>
-
+            <strong id="cartTotal">Rp0</strong>
         </div>
 
-        <button
-            class="primary-button full"
-            type="submit">
-
-            Checkout
-
-        </button>
-
+        <button class="primary-button full"
+                type="submit">Checkout</button>
     </form>
-
 </dialog>
 
-<div
-class="toast"
-id="toast">
-
+<div class="toast"
+     id="toast">
 </div>
 
 <script src="app.js"></script>
-
 </body>
 
 </html>
