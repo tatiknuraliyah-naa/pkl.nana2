@@ -20,7 +20,7 @@ const products = [
     price: 18000,
     stock: 14,
     description: "Pastry renyah berlapis dengan aroma butter yang kuat.",
-    image: "croisant.jpeg"
+    image: "https://i.pinimg.com/1200x/56/22/39/562239e127eaa2f88054c6b2d39ee0df.jpg"
   },
   {
     id: "roti-cokelat",
@@ -29,7 +29,7 @@ const products = [
     price: 12000,
     stock: 22,
     description: "Roti lembut dengan isian cokelat pekat.",
-    image: "choco cinnamon.jpeg"
+    image: "https://i.pinimg.com/736x/82/b3/a0/82b3a0bd9b41fab401a803e93f4b97a8.jpg"
   },
   {
     id: "roti-tawar",
@@ -38,7 +38,7 @@ const products = [
     price: 26000,
     stock: 7,
     description: "Roti lembut dengan cream susu ringan.",
-    image: "bread milk.jpeg"
+    image: "https://i.pinimg.com/1200x/08/ac/46/08ac46364ab668182c705bfca3715665.jpg"
   },
   {
     id: "cheese-roll",
@@ -47,7 +47,7 @@ const products = [
     price: 8000,
     stock: 4,
     description: "Roti gulung lembut dengan keju gurih.",
-    image: "bread cheese roll.jpeg"
+    image: "https://i.pinimg.com/736x/a6/17/9f/a6179f256963f4715317a0d00da85cbc.jpg"
   },
   {
     id: "donat-kayu-manis",
@@ -56,16 +56,16 @@ const products = [
     price: 10000,
     stock: 0,
     description: "Donat empuk dengan taburan gula kayu manis.",
-    image: "cinamon donuts.jpeg"
+    image: "https://i.pinimg.com/736x/77/32/b4/7732b44089788c15f9efd102a2b20bae.jpg"
   },
   {
     id: "cake-berry",
-    name: "Mini Berry Cake",
+    name: "Bloom Mini Cake",
     category: "Kue",
     price: 34000,
     stock: 9,
-    description: "Kue mini dengan krim ringan dan berry.",
-    image: "berry cake.jpeg"
+    description: "Kue mini cantik dengan topping pilihan dan cita rasa yang lembut.",
+    image: "https://i.pinimg.com/1200x/1a/e4/20/1ae420f77902137d40bf3592201664a6.jpg"
   },
   {
     id: "kopi-susu",
@@ -74,7 +74,7 @@ const products = [
     price: 16000,
     stock: 18,
     description: "Kopi susu dingin untuk teman pastry.",
-    image: "coffe latte.jpeg"
+    image: "https://i.pinimg.com/736x/c4/cb/22/c4cb22da46cf14e76c01fcbdebe15393.jpg"
   },
   {
     id: "morning-box",
@@ -83,7 +83,16 @@ const products = [
     price: 72000,
     stock: 6,
     description: "Paket 6 roti campur untuk keluarga atau kantor.",
-    image: "bread lunch.jpeg"
+    image: "https://i.pinimg.com/736x/ad/c2/ed/adc2edd4df873d006cf187b37a2cc103.jpg"
+  },
+  {
+    id: "matcha-latte",
+    name: "Matcha Latte",
+    category: "Drink",
+    price: 16000,
+    stock: 6,
+    description: "Matcha latte dengan aroma matcha yang khas.",
+    image: "https://i.pinimg.com/1200x/45/9a/fb/459afbc3f9000c8001ab06e67549b924.jpg"
   },
 ];
 
@@ -93,7 +102,7 @@ let cart = [];
 let orders = [
   {
     id: "TR-260703-001",
-    customer: "Alya",
+    customer: "nana",
     phone: "081288889999",
     fulfillment: "Ambil di toko",
     payment: "Bayar di toko",
