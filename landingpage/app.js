@@ -5,11 +5,12 @@ const currency = new Intl.NumberFormat("id-ID", {
 });
 
 const statusFlow = [
-  "Menunggu konfirmasi",
-  "Diproses",
-  "Siap diambil",
-  "Dalam pengantaran",
-  "Selesai",
+  "Pending",
+  "Processing",
+  "Packed",
+  "Shipped",
+  "Completed",
+  "Cancelled",
 ];
 
 const categorySearchTags = {
@@ -587,9 +588,17 @@ const products = [
 
 let selectedCategory = "Semua";
 let searchTerm = "";
+let sortMode = "featured";
 let cart = [];
 let buyers = [];
 let currentSession = null;
+let wishlist = [];
+let customProducts = [];
+let appSettings = {
+  darkMode: false,
+  notifications: true,
+  language: "id",
+};
 let orders = [
   {
     id: "TR-260703-001",
@@ -614,6 +623,9 @@ const storageKeys = {
   buyers: "serenytBuyers",
   currentSession: "serenytCurrentSession",
   storeHours: "serenytStoreHours",
+  wishlist: "serenytWishlist",
+  settings: "serenytSettings",
+  customProducts: "serenytCustomProducts",
 };
 
 let storeHours = {
@@ -677,6 +689,28 @@ const sidebarProfileName = document.querySelector("#sidebarProfileName");
 const profilePhotoPreview = document.querySelector("#profilePhotoPreview");
 const profilePhotoInput = document.querySelector("#profilePhotoInput");
 const photoHistory = document.querySelector("#photoHistory");
+const wishlistGrid = document.querySelector("#wishlistGrid");
+const sortProducts = document.querySelector("#sortProducts");
+const checkoutSummary = document.querySelector("#checkoutSummary");
+const forgotPasswordDialog = document.querySelector("#forgotPasswordDialog");
+const productDetailDialog = document.querySelector("#productDetailDialog");
+const productDetailContent = document.querySelector("#productDetailContent");
+const logoutDialog = document.querySelector("#logoutDialog");
+const adminCustomers = document.querySelector("#adminCustomers");
+const adminReports = document.querySelector("#adminReports");
+const addProductForm = document.querySelector("#addProductForm");
+const newProductCategory = document.querySelector("#newProductCategory");
+const darkModeToggle = document.querySelector("#darkModeToggle");
+const notificationToggle = document.querySelector("#notificationToggle");
+const languageSelect = document.querySelector("#languageSelect");
+const scrollTopButton = document.querySelector("#scrollTop");
+const loadingScreen = document.querySelector("#loadingScreen");
+
+const adminAccount = {
+  email: "admin@serenitybakery.com",
+  password: "Admin123",
+  role: "Administrator",
+};
 
 function loadSavedData() {
   const savedOrders = JSON.parse(localStorage.getItem(storageKeys.orders) || "null");
@@ -684,9 +718,19 @@ function loadSavedData() {
   const savedBuyers = JSON.parse(localStorage.getItem(storageKeys.buyers) || "null");
   const savedSession = JSON.parse(localStorage.getItem(storageKeys.currentSession) || "null");
   const savedStoreHours = JSON.parse(localStorage.getItem(storageKeys.storeHours) || "null");
+  const savedWishlist = JSON.parse(localStorage.getItem(storageKeys.wishlist) || "null");
+  const savedSettings = JSON.parse(localStorage.getItem(storageKeys.settings) || "null");
+  const savedCustomProducts = JSON.parse(localStorage.getItem(storageKeys.customProducts) || "null");
 
   if (Array.isArray(savedOrders)) {
     orders = savedOrders;
+  }
+
+  if (Array.isArray(savedCustomProducts)) {
+    customProducts = savedCustomProducts;
+    customProducts.forEach((product) => {
+      if (!products.some((item) => item.id === product.id)) products.unshift(product);
+    });
   }
 
   buyers = Array.isArray(savedBuyers) ? savedBuyers : [];
@@ -717,6 +761,12 @@ function loadSavedData() {
   if (savedStoreHours?.open && savedStoreHours?.close) {
     storeHours = savedStoreHours;
   }
+
+  wishlist = Array.isArray(savedWishlist) ? savedWishlist : [];
+  if (savedSettings && typeof savedSettings === "object") {
+    appSettings = { ...appSettings, ...savedSettings };
+  }
+  applySettings();
 }
 
 function saveBuyers() {
@@ -743,8 +793,27 @@ function saveStocks() {
   localStorage.setItem(storageKeys.productStocks, JSON.stringify(stocks));
 }
 
+function saveCustomProducts() {
+  localStorage.setItem(storageKeys.customProducts, JSON.stringify(customProducts));
+}
+
 function saveStoreHours() {
   localStorage.setItem(storageKeys.storeHours, JSON.stringify(storeHours));
+}
+
+function saveWishlist() {
+  localStorage.setItem(storageKeys.wishlist, JSON.stringify(wishlist));
+}
+
+function saveSettings() {
+  localStorage.setItem(storageKeys.settings, JSON.stringify(appSettings));
+}
+
+function applySettings() {
+  document.body.classList.toggle("dark-mode", Boolean(appSettings.darkMode));
+  if (darkModeToggle) darkModeToggle.checked = Boolean(appSettings.darkMode);
+  if (notificationToggle) notificationToggle.checked = Boolean(appSettings.notifications);
+  if (languageSelect) languageSelect.value = appSettings.language || "id";
 }
 
 function formatPrice(value) {
@@ -758,6 +827,35 @@ function formatClock(value) {
 function currentBuyer() {
   if (currentSession?.role !== "buyer") return null;
   return buyers.find((buyer) => buyer.id === currentSession.id) || null;
+}
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function isStrongPassword(password) {
+  return /[a-z]/.test(password) && /[A-Z]/.test(password) && /\d/.test(password) && password.length >= 8;
+}
+
+function setText(selector, message = "") {
+  const element = document.querySelector(selector);
+  if (element) element.textContent = message;
+}
+
+function checkoutCosts() {
+  const subtotal = cartValue();
+  const fulfillment = document.querySelector("#fulfillment")?.value || "Regular";
+  const shipping = fulfillment === "Pickup" ? 0 : fulfillment === "Express" ? 18000 : 10000;
+  const voucher = document.querySelector("#voucherCode")?.value.trim().toUpperCase();
+  const discount = voucher === "SERENYT10" ? Math.round(subtotal * 0.1) : 0;
+  const tax = Math.round((subtotal - discount) * 0.11);
+  return {
+    subtotal,
+    shipping,
+    discount,
+    tax,
+    total: Math.max(0, subtotal - discount + tax + shipping),
+  };
 }
 
 function switchAuthTab(tabName) {
@@ -781,6 +879,9 @@ function switchAdminPage(pageName) {
     stats: ["Dashboard Admin", "Statistika Penjualan", "Pantau pemasukan dan jam buka toko."],
     orders: ["Dashboard Admin", "Pesanan Masuk", "Kelola status pesanan pembeli."],
     products: ["Dashboard Admin", "Produk Toko", "Atur stok dan pantau menu."],
+    customers: ["Dashboard Admin", "Customers", "Lihat pelanggan dan nilai pembelian."],
+    reports: ["Dashboard Admin", "Reports", "Ringkasan performa toko."],
+    settings: ["Dashboard Admin", "Settings", "Atur profil bisnis bakery."],
   };
   const [eyebrow, title, subtitle] = titles[pageName] || titles.stats;
   if (topEyebrow) topEyebrow.textContent = eyebrow;
@@ -835,26 +936,59 @@ function applySession() {
 
 function loginBuyer(email, password) {
   const normalizedEmail = email.trim().toLowerCase();
+  setText("#buyerLoginEmailMessage");
+  setText("#buyerLoginPasswordMessage");
+
+  if (!normalizedEmail) {
+    setText("#buyerLoginEmailMessage", "Email is required.");
+    return;
+  }
+  if (!password) {
+    setText("#buyerLoginPasswordMessage", "Password is required.");
+    return;
+  }
+  if (!isValidEmail(normalizedEmail)) {
+    setText("#buyerLoginEmailMessage", "Invalid email format.");
+    return;
+  }
+
   const buyer = buyers.find((item) => item.email.toLowerCase() === normalizedEmail);
 
   if (!buyer) {
-    showToast("Email belum terdaftar. Buat akun dulu ya.");
+    setText("#buyerLoginEmailMessage", "Email is not registered.");
     return;
   }
 
   if (buyer.password !== password) {
-    showToast("Password untuk email ini belum cocok.");
+    setText("#buyerLoginPasswordMessage", "Incorrect password.");
     return;
   }
 
   setSession({ role: "buyer", id: buyer.id, name: buyer.name });
-  showToast(`Selamat datang, ${buyer.name}.`);
+  showToast("Login successful.");
 }
 
 function registerBuyer(formData) {
   const email = formData.email.trim().toLowerCase();
+  setText("#registerMessage");
+  if (!formData.name.trim() || !formData.phone.trim() || !email || !formData.password || !formData.confirmPassword) {
+    setText("#registerMessage", "Semua field wajib diisi.");
+    return;
+  }
+  if (!isValidEmail(email)) {
+    setText("#registerMessage", "Invalid email format.");
+    return;
+  }
   if (buyers.some((buyer) => buyer.email.toLowerCase() === email)) {
-    showToast("Email sudah terdaftar, coba login ya.");
+    setText("#registerMessage", "Email cannot already exist.");
+    return;
+  }
+  if (!isStrongPassword(formData.password)) {
+    setText("#registerMessage", "Password minimum 8 karakter serta berisi uppercase, lowercase, dan angka.");
+    return;
+  }
+  if (formData.password !== formData.confirmPassword) {
+    setText("#registerMessage", "Confirm password must match.");
     return;
   }
 
@@ -867,6 +1001,7 @@ function registerBuyer(formData) {
     address: "",
     photo: "logo.png",
     photoHistory: [],
+    joinDate: new Date().toISOString().slice(0, 10),
   };
 
   buyers.unshift(buyer);
@@ -876,13 +1011,13 @@ function registerBuyer(formData) {
 }
 
 function loginAdmin(username, password) {
-  if (username === "admin" && password === "admin123") {
+  if (username.toLowerCase() === adminAccount.email && password === adminAccount.password) {
     setSession({ role: "admin", name: "Admin" });
     showToast("Login admin berhasil.");
     return true;
   }
 
-  showToast("Username atau password admin salah.");
+  showToast("Email atau password admin salah.");
   return false;
 }
 
@@ -901,6 +1036,12 @@ function renderCheckoutProfile() {
   if (!checkoutName || !checkoutPhone) return;
   checkoutName.textContent = buyer?.name || "Pembeli";
   checkoutPhone.textContent = buyer?.phone || "Nomor HP belum diisi";
+  const checkoutCustomerName = document.querySelector("#checkoutCustomerName");
+  const checkoutCustomerPhone = document.querySelector("#checkoutCustomerPhone");
+  const checkoutAddress = document.querySelector("#checkoutAddress");
+  if (checkoutCustomerName) checkoutCustomerName.value = buyer?.name || "";
+  if (checkoutCustomerPhone) checkoutCustomerPhone.value = buyer?.phone || "";
+  if (checkoutAddress) checkoutAddress.value = buyer?.address || "";
 }
 
 function renderProfilePhoto() {
@@ -976,12 +1117,27 @@ function renderCategories() {
 }
 
 function filteredProducts() {
-  return products.filter((product) => {
+  const visible = products.filter((product) => {
     const matchesCategory = selectedCategory === "Semua" || product.category === selectedCategory;
     const categoryTags = categorySearchTags[product.category] || "";
     const haystack = `${product.name} ${product.category} ${product.label || ""} ${categoryTags} ${product.description}`.toLowerCase();
     return matchesCategory && haystack.includes(searchTerm.toLowerCase());
   });
+  return visible.sort((a, b) => {
+    if (sortMode === "name") return a.name.localeCompare(b.name);
+    if (sortMode === "price-low") return a.price - b.price;
+    if (sortMode === "price-high") return b.price - a.price;
+    if (sortMode === "stock") return b.stock - a.stock;
+    return 0;
+  });
+}
+
+function productBadges(product, index) {
+  const badges = [];
+  if (index < 4 || product.name.includes("Baker")) badges.push("Best Seller");
+  if (product.id.includes("cloud") || product.id.includes("signature")) badges.push("New");
+  if (product.stock <= 5) badges.push("Limited");
+  return badges;
 }
 
 function renderProducts() {
@@ -989,14 +1145,18 @@ function renderProducts() {
   const visibleProducts = filteredProducts();
   productSummary.textContent = `${visibleProducts.length} produk cocok dengan pilihan saat ini.`;
   productGrid.innerHTML = visibleProducts
-    .map((product) => {
+    .map((product, index) => {
       const stock = stockLabel(product.stock);
+      const favorite = wishlist.includes(product.id);
       return `
         <article class="product-card">
           <div class="product-image">
             <img src="${product.image}" alt="${product.name}">
           </div>
           <div class="product-body">
+            <div class="badge-row">
+              ${productBadges(product, index).map((badge) => `<span class="mini-badge">${badge}</span>`).join("")}
+            </div>
             <div class="product-info">
               <h3>${product.name}</h3>
               <p>${product.description}</p>
@@ -1006,10 +1166,16 @@ function renderProducts() {
               <span class="status-pill ${stock.className}">${stock.text}</span>
             </div>
             <div class="product-meta">
+              <span>★★★★★ 4.${(index % 5) + 4} • ${18 + index} reviews</span>
+            </div>
+            <div class="product-meta">
               <strong class="price">${formatPrice(product.price)}</strong>
-              <button class="secondary-button" data-add="${product.id}" ${product.stock <= 0 ? "disabled" : ""} type="button">
-                Tambah
-              </button>
+              <div class="admin-actions">
+                <button class="secondary-button" data-detail="${product.id}" type="button">View</button>
+                <button class="secondary-button" data-wishlist="${product.id}" type="button">${favorite ? "♥" : "♡"}</button>
+                <button class="secondary-button" data-add="${product.id}" ${product.stock <= 0 ? "disabled" : ""} type="button">Cart</button>
+                <button class="primary-button" data-buy="${product.id}" ${product.stock <= 0 ? "disabled" : ""} type="button">Buy</button>
+              </div>
             </div>
           </div>
         </article>
@@ -1022,6 +1188,74 @@ function renderProducts() {
   }
 }
 
+function renderWishlist() {
+  if (!wishlistGrid) return;
+  const items = wishlist.map((id) => products.find((product) => product.id === id)).filter(Boolean);
+  if (!items.length) {
+    wishlistGrid.innerHTML = `<div class="empty-state">Wishlist masih kosong.</div>`;
+    return;
+  }
+  wishlistGrid.innerHTML = items
+    .map(
+      (product) => `
+        <article class="product-card">
+          <div class="product-image"><img src="${product.image}" alt="${product.name}"></div>
+          <div class="product-body">
+            <h3>${product.name}</h3>
+            <p>${product.description}</p>
+            <div class="product-meta"><strong class="price">${formatPrice(product.price)}</strong><span>${product.category}</span></div>
+            <div class="admin-actions">
+              <button class="secondary-button" data-remove-wishlist="${product.id}" type="button">Remove</button>
+              <button class="primary-button" data-move-cart="${product.id}" type="button">Move to Cart</button>
+            </div>
+          </div>
+        </article>
+      `,
+    )
+    .join("");
+}
+
+function toggleWishlist(productId) {
+  if (wishlist.includes(productId)) {
+    wishlist = wishlist.filter((id) => id !== productId);
+    showToast("Wishlist dihapus.");
+  } else {
+    wishlist.unshift(productId);
+    showToast("Wishlist Added.");
+  }
+  saveWishlist();
+  renderProducts();
+  renderWishlist();
+}
+
+function showProductDetail(productId) {
+  const product = products.find((item) => item.id === productId);
+  if (!product || !productDetailContent || !productDetailDialog) return;
+  const related = products.filter((item) => item.category === product.category && item.id !== product.id).slice(0, 3);
+  productDetailContent.innerHTML = `
+    <div class="drawer-header compact">
+      <div>
+        <p class="eyebrow">${product.category}</p>
+        <h2>${product.name}</h2>
+      </div>
+      <button class="icon-button" data-close-detail type="button">x</button>
+    </div>
+    <img class="detail-image" src="${product.image}" alt="${product.name}">
+    <p>${product.description}</p>
+    <div class="product-meta"><strong class="price">${formatPrice(product.price)}</strong><span>Stock ${product.stock} • Rating 4.8</span></div>
+    <p><strong>Ingredients:</strong> Flour, butter, milk, sugar. <strong>Allergens:</strong> Gluten, dairy.</p>
+    <div>
+      <p class="eyebrow">Related Products</p>
+      <div class="admin-actions">${related.map((item) => `<button class="secondary-button" data-detail="${item.id}" type="button">${item.name}</button>`).join("")}</div>
+    </div>
+    <div class="admin-actions">
+      <button class="secondary-button" data-wishlist="${product.id}" type="button">Favorite</button>
+      <button class="primary-button" data-buy="${product.id}" type="button">Buy Now</button>
+    </div>
+  `;
+  if (!productDetailDialog.open) productDetailDialog.showModal();
+}
+
 function cartQuantity() {
   return cart.reduce((sum, item) => sum + item.quantity, 0);
 }
@@ -1032,8 +1266,17 @@ function cartValue() {
 
 function renderCart() {
   if (!cartCount || !cartTotal || !cartItems) return;
+  const costs = checkoutCosts();
   cartCount.textContent = cartQuantity();
-  cartTotal.textContent = formatPrice(cartValue());
+  cartTotal.textContent = formatPrice(costs.total);
+  if (checkoutSummary) {
+    checkoutSummary.innerHTML = `
+      <div><span>Subtotal</span><strong>${formatPrice(costs.subtotal)}</strong></div>
+      <div><span>Shipping Fee</span><strong>${formatPrice(costs.shipping)}</strong></div>
+      <div><span>Voucher</span><strong>-${formatPrice(costs.discount)}</strong></div>
+      <div><span>Tax 11%</span><strong>${formatPrice(costs.tax)}</strong></div>
+    `;
+  }
 
   if (!cart.length) {
     cartItems.innerHTML = `<div class="empty-state">Keranjang masih kosong.</div>`;
@@ -1224,6 +1467,12 @@ function renderAdminProducts() {
                 ${product.stock > 0 ? "Kosongkan" : "Aktifkan"}
               </button>
             </div>
+            <div class="admin-actions">
+              <button class="secondary-button" data-detail="${product.id}" type="button">View</button>
+              <button class="secondary-button" data-duplicate="${product.id}" type="button">Duplicate</button>
+              <button class="secondary-button" data-restock="${product.id}" type="button">Restock</button>
+              <button class="secondary-button" data-delete-product="${product.id}" type="button">Delete</button>
+            </div>
           </div>
         </article>
       `;
@@ -1287,6 +1536,68 @@ function renderAdminStats() {
   `;
 }
 
+function renderAdminCustomers() {
+  if (!adminCustomers) return;
+  adminCustomers.innerHTML = `
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Customer</th>
+          <th>Contact</th>
+          <th>Join Date</th>
+          <th>Total Orders</th>
+          <th>Total Spending</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${buyers
+          .map((buyer) => {
+            const customerOrders = orders.filter((order) => order.buyerId === buyer.id);
+            const spending = customerOrders.reduce((sum, order) => sum + order.total, 0);
+            return `
+              <tr>
+                <td><strong>${buyer.name}</strong><br><span>${buyer.address || "Address belum diisi"}</span></td>
+                <td>${buyer.phone}<br>${buyer.email}</td>
+                <td>${buyer.joinDate || "-"}</td>
+                <td>${customerOrders.length}</td>
+                <td>${formatPrice(spending)}</td>
+                <td><span class="status-pill">Active</span></td>
+              </tr>
+            `;
+          })
+          .join("")}
+      </tbody>
+    </table>
+  `;
+}
+
+function renderAdminReports() {
+  if (!adminReports) return;
+  const revenue = orders.reduce((sum, order) => sum + order.total, 0);
+  const completed = orders.filter((order) => order.status === "Selesai" || order.status === "Completed").length;
+  const cancelled = orders.filter((order) => order.status === "Cancelled" || order.status === "Dibatalkan").length;
+  const topCustomer = buyers
+    .map((buyer) => ({
+      name: buyer.name,
+      total: orders.filter((order) => order.buyerId === buyer.id).reduce((sum, order) => sum + order.total, 0),
+    }))
+    .sort((a, b) => b.total - a.total)[0];
+  adminReports.innerHTML = `
+    <article class="stat-card"><span>Daily Revenue</span><strong>${formatPrice(revenue)}</strong></article>
+    <article class="stat-card"><span>Orders</span><strong>${orders.length}</strong></article>
+    <article class="stat-card"><span>Completed</span><strong>${completed}</strong></article>
+    <article class="stat-card"><span>Cancelled</span><strong>${cancelled}</strong></article>
+    <article class="stat-card wide"><span>Top Customer</span><strong>${topCustomer?.name || "Belum ada"}</strong><small>${formatPrice(topCustomer?.total || 0)}</small></article>
+  `;
+}
+
+function renderNewProductCategories() {
+  if (!newProductCategory) return;
+  const categories = [...new Set(products.map((product) => product.category))];
+  newProductCategory.innerHTML = categories.map((category) => `<option>${category}</option>`).join("");
+}
+
 function submitOrder(event) {
   event.preventDefault();
   const buyer = currentBuyer();
@@ -1304,13 +1615,18 @@ function submitOrder(event) {
     id: `TR-${new Date().toISOString().slice(2, 10).replace(/-/g, "")}-${String(orders.length + 1).padStart(3, "0")}`,
     createdAt: new Date().toISOString(),
     buyerId: buyer.id,
-    customer: buyer.name,
-    phone: buyer.phone,
+    customer: document.querySelector("#checkoutCustomerName").value.trim() || buyer.name,
+    phone: document.querySelector("#checkoutCustomerPhone").value.trim() || buyer.phone,
+    address: document.querySelector("#checkoutAddress").value.trim(),
     fulfillment: document.querySelector("#fulfillment").value,
     payment: document.querySelector("#paymentMethod").value,
     note: document.querySelector("#orderNote").value.trim(),
-    status: "Menunggu konfirmasi",
-    total: cartValue(),
+    status: "Pending",
+    subtotal: checkoutCosts().subtotal,
+    shipping: checkoutCosts().shipping,
+    discount: checkoutCosts().discount,
+    tax: checkoutCosts().tax,
+    total: checkoutCosts().total,
     items: cart.map((item) => ({ ...item })),
   };
 
@@ -1325,7 +1641,7 @@ function submitOrder(event) {
   cart = [];
   cartDialog.close();
   renderAll();
-  showToast("Pesanan berhasil dibuat dan menunggu konfirmasi.");
+  showToast("Checkout Success.");
   switchView("orders");
 }
 
@@ -1345,7 +1661,9 @@ function switchView(viewName) {
   const titles = {
     shop: ["Freshly Baked Everyday", "Freshly Baked Happiness", "Bakery • Drinks • Desserts"],
     orders: ["Pesanan Pembeli", "Riwayat Pesanan", "Pantau status pesanan dari akun kamu."],
+    wishlist: ["Wishlist", "Produk Favorit", "Simpan dan pindahkan menu favorit ke keranjang."],
     profile: ["Profil Pembeli", "Data Akun", "Ubah nama, nomor HP, email, dan alamat."],
+    settings: ["Settings", "Preferensi Akun", "Atur mode, bahasa, dan notifikasi."],
     admin: ["Dashboard Admin", "Statistika Penjualan", "Kelola pesanan, stok, dan produk toko."],
   };
   const [eyebrow, title, subtitle] = titles[viewName] || titles.shop;
@@ -1370,9 +1688,14 @@ function renderAll() {
   renderOrders();
   renderAdminProducts();
   renderAdminStats();
+  renderAdminCustomers();
+  renderAdminReports();
+  renderWishlist();
+  renderNewProductCategories();
   renderCheckoutProfile();
   renderStoreHours();
   renderProfilePhoto();
+  applySettings();
 }
 
 function printReceipt(orderId) {
@@ -1460,11 +1783,27 @@ document.querySelectorAll("[data-toggle-password]").forEach((button) => {
 
 buyerLoginForm?.addEventListener("submit", (event) => {
   event.preventDefault();
-  loginBuyer(
-    document.querySelector("#buyerLoginEmail").value.trim(),
-    document.querySelector("#buyerLoginPassword").value,
-  );
-  buyerLoginForm.reset();
+  const button = document.querySelector("#buyerLoginSubmit");
+  button?.classList.add("is-loading");
+  button?.setAttribute("disabled", "true");
+  setTimeout(() => {
+    const hadSession = Boolean(currentSession);
+    loginBuyer(
+      document.querySelector("#buyerLoginEmail").value.trim(),
+      document.querySelector("#buyerLoginPassword").value,
+    );
+    if (currentSession && !hadSession && !document.querySelector("#rememberMe")?.checked) {
+      localStorage.removeItem(storageKeys.currentSession);
+    }
+    button?.classList.remove("is-loading");
+    button?.removeAttribute("disabled");
+    if (currentSession) buyerLoginForm.reset();
+  }, 350);
+});
+
+document.querySelector("#buyerLoginPassword")?.addEventListener("keyup", (event) => {
+  const warning = document.querySelector("#buyerLoginCaps");
+  if (warning) warning.hidden = !event.getModifierState("CapsLock");
 });
 
 demoBuyerLogin?.addEventListener("click", () => {
@@ -1478,8 +1817,9 @@ buyerRegisterForm?.addEventListener("submit", (event) => {
     phone: document.querySelector("#registerPhone").value,
     email: document.querySelector("#registerEmail").value,
     password: document.querySelector("#registerPassword").value,
+    confirmPassword: document.querySelector("#registerConfirmPassword").value,
   });
-  buyerRegisterForm.reset();
+  if (currentSession) buyerRegisterForm.reset();
 });
 
 mainAdminLoginForm?.addEventListener("submit", (event) => {
@@ -1507,6 +1847,21 @@ profileForm?.addEventListener("submit", (event) => {
   buyer.email = nextEmail;
   buyer.phone = document.querySelector("#profilePhone").value.trim();
   buyer.address = document.querySelector("#profileAddress").value.trim();
+  const oldPassword = document.querySelector("#profileOldPassword").value;
+  const newPassword = document.querySelector("#profileNewPassword").value;
+  if (oldPassword || newPassword) {
+    if (oldPassword !== buyer.password) {
+      showToast("Password lama tidak cocok.");
+      return;
+    }
+    if (!isStrongPassword(newPassword)) {
+      showToast("Password baru harus kuat.");
+      return;
+    }
+    buyer.password = newPassword;
+    document.querySelector("#profileOldPassword").value = "";
+    document.querySelector("#profileNewPassword").value = "";
+  }
   currentSession.name = buyer.name;
   saveBuyers();
   saveSession();
@@ -1570,16 +1925,25 @@ storeHoursForm?.addEventListener("submit", (event) => {
 });
 
 logoutSession?.addEventListener("click", () => {
+  logoutDialog?.showModal();
+});
+
+document.querySelector("#confirmLogout")?.addEventListener("click", () => {
   currentSession = null;
   cart = [];
   localStorage.removeItem(storageKeys.adminLoggedIn);
   saveSession();
   applySession();
-  showToast("Kamu sudah logout.");
+  showToast("Logout Success.");
 });
 
 document.querySelector("#searchInput")?.addEventListener("input", (event) => {
   searchTerm = event.target.value;
+  renderProducts();
+});
+
+sortProducts?.addEventListener("change", (event) => {
+  sortMode = event.target.value;
   renderProducts();
 });
 
@@ -1592,8 +1956,18 @@ categoryTabs?.addEventListener("click", (event) => {
 });
 
 productGrid?.addEventListener("click", (event) => {
-  const button = event.target.closest("[data-add]");
-  if (button) addToCart(button.dataset.add);
+  const addButton = event.target.closest("[data-add]");
+  const buyButton = event.target.closest("[data-buy]");
+  const wishlistButton = event.target.closest("[data-wishlist]");
+  const detailButton = event.target.closest("[data-detail]");
+  if (addButton) addToCart(addButton.dataset.add);
+  if (wishlistButton) toggleWishlist(wishlistButton.dataset.wishlist);
+  if (detailButton) showProductDetail(detailButton.dataset.detail);
+  if (buyButton) {
+    addToCart(buyButton.dataset.buy);
+    renderCart();
+    cartDialog.showModal();
+  }
 });
 
 document.querySelector("#addFeatured")?.addEventListener("click", () => addToCart("classic-bakers-box"));
@@ -1603,6 +1977,9 @@ document.querySelector("#openCart")?.addEventListener("click", () => {
   cartDialog.showModal();
 });
 
+document.querySelector("#fulfillment")?.addEventListener("change", renderCart);
+document.querySelector("#voucherCode")?.addEventListener("input", renderCart);
+
 cartItems?.addEventListener("click", (event) => {
   const increase = event.target.closest("[data-increase]");
   const decrease = event.target.closest("[data-decrease]");
@@ -1611,6 +1988,34 @@ cartItems?.addEventListener("click", (event) => {
 });
 
 document.querySelector("#checkoutForm")?.addEventListener("submit", submitOrder);
+
+wishlistGrid?.addEventListener("click", (event) => {
+  const removeButton = event.target.closest("[data-remove-wishlist]");
+  const moveButton = event.target.closest("[data-move-cart]");
+  if (removeButton) toggleWishlist(removeButton.dataset.removeWishlist);
+  if (moveButton) {
+    addToCart(moveButton.dataset.moveCart);
+    wishlist = wishlist.filter((id) => id !== moveButton.dataset.moveCart);
+    saveWishlist();
+    renderWishlist();
+    renderProducts();
+  }
+});
+
+productDetailContent?.addEventListener("click", (event) => {
+  const closeButton = event.target.closest("[data-close-detail]");
+  const detailButton = event.target.closest("[data-detail]");
+  const wishlistButton = event.target.closest("[data-wishlist]");
+  const buyButton = event.target.closest("[data-buy]");
+  if (closeButton) productDetailDialog.close();
+  if (detailButton) showProductDetail(detailButton.dataset.detail);
+  if (wishlistButton) toggleWishlist(wishlistButton.dataset.wishlist);
+  if (buyButton) {
+    addToCart(buyButton.dataset.buy);
+    productDetailDialog.close();
+    cartDialog.showModal();
+  }
+});
 
 document.querySelectorAll(".nav-item[data-view]").forEach((button) => {
   button.addEventListener("click", () => switchView(button.dataset.view));
@@ -1646,13 +2051,135 @@ adminProducts?.addEventListener("input", (event) => {
 
 adminProducts?.addEventListener("click", (event) => {
   const button = event.target.closest("[data-toggle]");
-  if (!button) return;
-  const product = products.find((item) => item.id === button.dataset.toggle);
-  if (!product) return;
-  product.stock = product.stock > 0 ? 0 : 10;
-  saveStocks();
-  renderAll();
+  const detailButton = event.target.closest("[data-detail]");
+  const duplicateButton = event.target.closest("[data-duplicate]");
+  const restockButton = event.target.closest("[data-restock]");
+  const deleteButton = event.target.closest("[data-delete-product]");
+  if (detailButton) showProductDetail(detailButton.dataset.detail);
+  if (button) {
+    const product = products.find((item) => item.id === button.dataset.toggle);
+    if (!product) return;
+    product.stock = product.stock > 0 ? 0 : 10;
+    saveStocks();
+    renderAll();
+  }
+  if (duplicateButton) {
+    const product = products.find((item) => item.id === duplicateButton.dataset.duplicate);
+    if (!product) return;
+    const copy = { ...product, id: `${product.id}-copy-${Date.now()}`, name: `${product.name} Copy` };
+    products.unshift(copy);
+    customProducts.unshift(copy);
+    saveCustomProducts();
+    saveStocks();
+    renderAll();
+    showToast("Produk berhasil diduplikasi.");
+  }
+  if (restockButton) {
+    const product = products.find((item) => item.id === restockButton.dataset.restock);
+    if (!product) return;
+    product.stock += 10;
+    saveStocks();
+    renderAll();
+    showToast("Stok ditambah 10.");
+  }
+  if (deleteButton) {
+    const productId = deleteButton.dataset.deleteProduct;
+    if (!confirm("Delete product?")) return;
+    const index = products.findIndex((item) => item.id === productId);
+    if (index >= 0) products.splice(index, 1);
+    customProducts = customProducts.filter((item) => item.id !== productId);
+    wishlist = wishlist.filter((id) => id !== productId);
+    saveCustomProducts();
+    saveWishlist();
+    saveStocks();
+    renderAll();
+    showToast("Produk dihapus.");
+  }
 });
+
+addProductForm?.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const name = document.querySelector("#newProductName").value.trim();
+  const category = document.querySelector("#newProductCategory").value;
+  const price = Number(document.querySelector("#newProductPrice").value || 0);
+  const stock = Number(document.querySelector("#newProductStock").value || 0);
+  const image = document.querySelector("#newProductImage").value.trim() || "logo.png";
+  const description = document.querySelector("#newProductDescription").value.trim();
+  const product = {
+    id: `${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${Date.now()}`,
+    name,
+    category,
+    price,
+    discount: 0,
+    stock,
+    status: "Active",
+    rating: 4.8,
+    sold: 0,
+    weight: "120g",
+    ingredients: "Flour, butter, milk, sugar",
+    allergens: "Gluten, dairy",
+    description,
+    image,
+  };
+  products.unshift(product);
+  customProducts.unshift(product);
+  saveCustomProducts();
+  saveStocks();
+  addProductForm.reset();
+  renderAll();
+  showToast("Produk baru berhasil ditambahkan.");
+});
+
+document.querySelector("#openForgotPassword")?.addEventListener("click", () => {
+  forgotPasswordDialog?.showModal();
+});
+
+document.querySelector("#forgotPasswordForm")?.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const email = document.querySelector("#forgotEmail").value.trim().toLowerCase();
+  if (buyers.some((buyer) => buyer.email.toLowerCase() === email)) {
+    setText("#forgotMessage", "Password reset link sent.");
+  } else {
+    setText("#forgotMessage", "Email is not registered.");
+  }
+});
+
+document.querySelector("#newsletterForm")?.addEventListener("submit", (event) => {
+  event.preventDefault();
+  showToast("Terima kasih sudah subscribe.");
+  event.currentTarget.reset();
+});
+
+darkModeToggle?.addEventListener("change", (event) => {
+  appSettings.darkMode = event.target.checked;
+  saveSettings();
+  applySettings();
+});
+
+notificationToggle?.addEventListener("change", (event) => {
+  appSettings.notifications = event.target.checked;
+  saveSettings();
+  showToast(event.target.checked ? "Notification aktif." : "Notification dimatikan.");
+});
+
+languageSelect?.addEventListener("change", (event) => {
+  appSettings.language = event.target.value;
+  saveSettings();
+  showToast("Language setting saved.");
+});
+
+document.querySelector("#adminSettingsForm")?.addEventListener("submit", (event) => {
+  event.preventDefault();
+  showToast("Bakery settings saved.");
+});
+
+document.querySelector("#printReport")?.addEventListener("click", () => window.print());
+
+window.addEventListener("scroll", () => {
+  scrollTopButton?.classList.toggle("show", window.scrollY > 300);
+});
+
+scrollTopButton?.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
 
 adminLoginForm?.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -1678,3 +2205,4 @@ loadSavedData();
 syncAdminAccess();
 applySession();
 renderAll();
+setTimeout(() => loadingScreen?.classList.add("hide"), 450);

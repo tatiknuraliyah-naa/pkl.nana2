@@ -11,6 +11,11 @@
 </head>
 
 <body>
+<div class="loading-screen" id="loadingScreen">
+    <img src="logo.png" alt="Serenyt Bakery">
+    <strong>Serenyt Bakery</strong>
+</div>
+
 <section class="auth-screen"
          id="authScreen">
     <div class="auth-visual">
@@ -49,6 +54,7 @@
                        placeholder="email bebas"
                        required>
             </label>
+            <p class="field-message" id="buyerLoginEmailMessage"></p>
             <label>
                 Password
                 <span class="password-field">
@@ -62,8 +68,18 @@
                             type="button">Lihat</button>
                 </span>
             </label>
-            <button class="primary-button full"
-                    type="submit">Masuk sebagai Pembeli</button>
+            <p class="field-message" id="buyerLoginPasswordMessage"></p>
+            <p class="caps-warning" id="buyerLoginCaps" hidden>Caps Lock aktif.</p>
+            <div class="auth-options">
+                <label class="inline-check">
+                    <input id="rememberMe" type="checkbox">
+                    Remember Me
+                </label>
+                <button class="link-button" id="openForgotPassword" type="button">Forgot Password?</button>
+            </div>
+            <button class="primary-button full loading-button"
+                    id="buyerLoginSubmit"
+                    type="submit"><span class="button-spinner"></span><span>Masuk sebagai Pembeli</span></button>
             <button class="secondary-button full"
                     id="demoBuyerLogin"
                     type="button">Coba Akun Demo</button>
@@ -105,13 +121,27 @@
                     <input id="registerPassword"
                            type="password"
                            autocomplete="new-password"
-                           minlength="4"
+                           minlength="8"
                            required>
                     <button class="password-toggle"
                             data-toggle-password="registerPassword"
                             type="button">Lihat</button>
                 </span>
             </label>
+            <label>
+                Konfirmasi Password
+                <span class="password-field">
+                    <input id="registerConfirmPassword"
+                           type="password"
+                           autocomplete="new-password"
+                           minlength="8"
+                           required>
+                    <button class="password-toggle"
+                            data-toggle-password="registerConfirmPassword"
+                            type="button">Lihat</button>
+                </span>
+            </label>
+            <p class="field-message" id="registerMessage"></p>
             <button class="primary-button full"
                     type="submit">Buat Akun</button>
         </form>
@@ -121,11 +151,11 @@
             <p class="eyebrow">Admin</p>
             <div class="form-row">
                 <label>
-                    Username
+                    Email
                     <input id="mainAdminUsername"
-                           type="text"
-                           autocomplete="username"
-                           placeholder="masukan username"
+                           type="email"
+                           autocomplete="email"
+                           placeholder="admin@serenitybakery.com"
                            required>
                 </label>
                 <label>
@@ -134,7 +164,7 @@
                         <input id="mainAdminPassword"
                                type="password"
                                autocomplete="current-password"
-                               placeholder="masukan password"
+                               placeholder="Admin123"
                                required>
                         <button class="password-toggle"
                                 data-toggle-password="mainAdminPassword"
@@ -190,10 +220,22 @@
                 <span>Pesanan</span>
             </button>
             <button class="nav-item buyer-only"
+                    data-view="wishlist"
+                    type="button">
+                ♡
+                <span>Wishlist</span>
+            </button>
+            <button class="nav-item buyer-only"
                     data-view="profile"
                     type="button">
                 👤
                 <span>Profil</span>
+            </button>
+            <button class="nav-item buyer-only"
+                    data-view="settings"
+                    type="button">
+                ◐
+                <span>Settings</span>
             </button>
             <button class="nav-item admin-only"
                     data-view="admin"
@@ -251,7 +293,19 @@
                 <div class="category-tabs"
                      id="categoryTabs">
                 </div>
+                <select id="sortProducts" aria-label="Urutkan produk">
+                    <option value="featured">Featured</option>
+                    <option value="name">Nama A-Z</option>
+                    <option value="price-low">Harga Terendah</option>
+                    <option value="price-high">Harga Tertinggi</option>
+                    <option value="stock">Stok Terbanyak</option>
+                </select>
             </div>
+
+            <section class="promo-banner">
+                <strong>Promo Hari Ini</strong>
+                <span>Gunakan voucher SERENYT10 untuk diskon 10% saat checkout.</span>
+            </section>
 
             <section class="featured-band">
                 <div class="featured-text">
@@ -278,6 +332,46 @@
             <div class="product-grid"
                  id="productGrid">
             </div>
+
+            <section class="content-grid">
+                <article>
+                    <p class="eyebrow">About</p>
+                    <h2>Warm bread, calm service, daily stock control.</h2>
+                    <p>Serenyt Bakery menghubungkan katalog, checkout, riwayat pesanan, stok, dan admin dashboard dalam satu sistem sederhana.</p>
+                </article>
+                <article>
+                    <p class="eyebrow">Testimonials</p>
+                    <h2>“Rotinya konsisten fresh.”</h2>
+                    <p>Rating rata-rata 4.8 dari pelanggan lokal untuk pastry, coffee, dan Baker's Box.</p>
+                </article>
+                <article>
+                    <p class="eyebrow">FAQ</p>
+                    <h2>Pickup atau delivery?</h2>
+                    <p>Keduanya tersedia. Pilih Regular atau Express saat checkout, lalu pantau statusnya di Orders.</p>
+                </article>
+            </section>
+
+            <section class="gallery-strip" aria-label="Instagram Feed">
+                <img src="https://i.pinimg.com/736x/ad/c2/ed/adc2edd4df873d006cf187b37a2cc103.jpg" alt="Baker box">
+                <img src="https://i.pinimg.com/1200x/56/22/39/562239e127eaa2f88054c6b2d39ee0df.jpg" alt="Croissant">
+                <img src="https://i.pinimg.com/736x/44/4a/2f/444a2fe12637fb7ddf94a9d168bb5f60.jpg" alt="Donut">
+                <img src="https://i.pinimg.com/1200x/fa/ba/df/fabadf995bd65e8010b385456e9cd859.jpg" alt="Cake">
+            </section>
+
+            <form class="newsletter-card" id="newsletterForm">
+                <div>
+                    <p class="eyebrow">Newsletter</p>
+                    <h2>Dapatkan info menu baru.</h2>
+                </div>
+                <input id="newsletterEmail" type="email" placeholder="email@example.com" required>
+                <button class="primary-button" type="submit">Subscribe</button>
+            </form>
+
+            <section class="contact-card">
+                <p class="eyebrow">Contact</p>
+                <h2>Jl. Bakery Manis No. 7</h2>
+                <p>WhatsApp 0812-8888-9999 • Instagram @serenytbakery</p>
+            </section>
         </section>
 
         <section class="view"
@@ -290,6 +384,15 @@
             <div id="ordersList"
                  class="orders-list">
             </div>
+        </section>
+
+        <section class="view"
+                 id="wishlistView">
+            <div class="section-title">
+                <h2>Wishlist</h2>
+                <p>Simpan menu favorit dan pindahkan ke keranjang.</p>
+            </div>
+            <div class="product-grid" id="wishlistGrid"></div>
         </section>
 
         <section class="view"
@@ -348,9 +451,38 @@
                                   rows="3"
                                   placeholder="Alamat untuk delivery"></textarea>
                     </label>
+                    <div class="form-row">
+                        <label>
+                            Password Lama
+                            <input id="profileOldPassword" type="password" autocomplete="current-password">
+                        </label>
+                        <label>
+                            Password Baru
+                            <input id="profileNewPassword" type="password" autocomplete="new-password">
+                        </label>
+                    </div>
                     <button class="primary-button"
                             type="submit">Simpan Profil</button>
                 </form>
+            </div>
+        </section>
+
+        <section class="view"
+                 id="settingsView">
+            <div class="settings-grid">
+                <section class="profile-card">
+                    <p class="eyebrow">Customer Settings</p>
+                    <h2>Preferensi</h2>
+                    <label class="inline-check"><input id="darkModeToggle" type="checkbox"> Dark Mode</label>
+                    <label class="inline-check"><input id="notificationToggle" type="checkbox" checked> Notification</label>
+                    <label>
+                        Language
+                        <select id="languageSelect">
+                            <option value="id">Indonesia</option>
+                            <option value="en">English</option>
+                        </select>
+                    </label>
+                </section>
             </div>
         </section>
 
@@ -366,6 +498,15 @@
                 <button class="admin-tab"
                         data-admin-page="products"
                         type="button">Produk</button>
+                <button class="admin-tab"
+                        data-admin-page="customers"
+                        type="button">Customers</button>
+                <button class="admin-tab"
+                        data-admin-page="reports"
+                        type="button">Reports</button>
+                <button class="admin-tab"
+                        data-admin-page="settings"
+                        type="button">Settings</button>
             </div>
 
             <section class="admin-page active"
@@ -422,10 +563,56 @@
                     <h2>Produk</h2>
                     <p>Atur stok dan pantau menu.</p>
                 </div>
+                <form class="store-hours-card" id="addProductForm">
+                    <div>
+                        <p class="eyebrow">Add Product</p>
+                        <h2>Produk Baru</h2>
+                    </div>
+                    <div class="form-row">
+                        <input id="newProductName" placeholder="Name" required>
+                        <select id="newProductCategory" required></select>
+                    </div>
+                    <div class="form-row">
+                        <input id="newProductPrice" type="number" min="0" placeholder="Price" required>
+                        <input id="newProductStock" type="number" min="0" placeholder="Stock" required>
+                    </div>
+                    <input id="newProductImage" type="url" placeholder="Thumbnail URL">
+                    <textarea id="newProductDescription" rows="2" placeholder="Description" required></textarea>
+                    <button class="primary-button" type="submit">Add Product</button>
+                </form>
 
                 <div id="adminProducts"
                      class="admin-products">
                 </div>
+            </section>
+
+            <section class="admin-page" id="adminCustomersPage">
+                <div class="section-title">
+                    <h2>Customers</h2>
+                    <p>Data pelanggan, pesanan, dan spending.</p>
+                </div>
+                <div class="table-card" id="adminCustomers"></div>
+            </section>
+
+            <section class="admin-page" id="adminReportsPage">
+                <div class="section-title">
+                    <h2>Reports</h2>
+                    <p>Revenue, orders, best seller, dan export UI.</p>
+                </div>
+                <div class="stats-grid" id="adminReports"></div>
+                <button class="secondary-button" id="printReport" type="button">Print Report</button>
+            </section>
+
+            <section class="admin-page" id="adminSettingsPage">
+                <form class="profile-card" id="adminSettingsForm">
+                    <p class="eyebrow">Settings</p>
+                    <h2>Bakery Profile</h2>
+                    <input id="bakeryName" placeholder="Bakery Name" value="Serenyt Bakery">
+                    <input id="bakeryPhone" placeholder="Phone" value="0812-8888-9999">
+                    <input id="bakeryEmail" type="email" placeholder="Email" value="hello@serenitybakery.com">
+                    <textarea id="bakeryAddress" rows="3" placeholder="Business Address">Jl. Bakery Manis No. 7</textarea>
+                    <button class="primary-button" type="submit">Save Settings</button>
+                </form>
             </section>
         </section>
     </main>
@@ -456,10 +643,26 @@
         </div>
 
         <label>
-            Metode Pengambilan
+            Customer Name
+            <input id="checkoutCustomerName" required>
+        </label>
+
+        <label>
+            Phone
+            <input id="checkoutCustomerPhone" required>
+        </label>
+
+        <label>
+            Address
+            <textarea id="checkoutAddress" rows="2" placeholder="Alamat delivery atau pickup note"></textarea>
+        </label>
+
+        <label>
+            Shipping Method
             <select id="fulfillment">
-                <option>Ambil di Toko</option>
-                <option>Delivery</option>
+                <option value="Regular">Regular</option>
+                <option value="Express">Express</option>
+                <option value="Pickup">Pickup</option>
             </select>
         </label>
 
@@ -473,11 +676,16 @@
         <label>
             Pembayaran
             <select id="paymentMethod">
-                <option>Cash</option>
+                <option>COD</option>
                 <option>Transfer</option>
-                <option>E-Wallet</option>
+                <option>QRIS</option>
             </select>
         </label>
+        <label>
+            Voucher
+            <input id="voucherCode" placeholder="SERENYT10">
+        </label>
+        <div class="summary-lines" id="checkoutSummary"></div>
 
         <div class="cart-total">
             <span>Total</span>
@@ -488,6 +696,39 @@
                 type="submit">Checkout</button>
     </form>
 </dialog>
+
+<dialog class="modal-card" id="forgotPasswordDialog">
+    <form class="profile-card" id="forgotPasswordForm">
+        <div class="drawer-header compact">
+            <div>
+                <p class="eyebrow">Forgot Password</p>
+                <h2>Reset Password</h2>
+            </div>
+            <button class="icon-button" value="cancel" formmethod="dialog" type="submit">x</button>
+        </div>
+        <label>Email<input id="forgotEmail" type="email" required></label>
+        <p class="field-message" id="forgotMessage"></p>
+        <button class="primary-button" type="submit">Send Reset Link</button>
+    </form>
+</dialog>
+
+<dialog class="modal-card" id="productDetailDialog">
+    <div class="profile-card" id="productDetailContent"></div>
+</dialog>
+
+<dialog class="modal-card" id="logoutDialog">
+    <form class="profile-card" method="dialog">
+        <p class="eyebrow">Logout</p>
+        <h2>Keluar dari sesi?</h2>
+        <div class="admin-actions">
+            <button class="secondary-button" value="cancel" type="submit">Cancel</button>
+            <button class="primary-button" id="confirmLogout" value="logout" type="submit">Logout</button>
+        </div>
+    </form>
+</dialog>
+
+<a class="floating-whatsapp" href="https://wa.me/6281288889999" target="_blank" rel="noreferrer">WA</a>
+<button class="scroll-top" id="scrollTop" type="button">↑</button>
 
 <div class="toast"
      id="toast">
