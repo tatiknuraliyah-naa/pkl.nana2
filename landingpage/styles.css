@@ -74,7 +74,7 @@ button {
   gap: 14px;
   background: var(--paper);
   color: var(--warm-dark);
-  transition: opacity 220ms ease, visibility 220ms ease;
+  transition: opacity 120ms ease, visibility 120ms ease;
 }
 
 .loading-screen img {

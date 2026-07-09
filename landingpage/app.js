@@ -2205,4 +2205,4 @@ loadSavedData();
 syncAdminAccess();
 applySession();
 renderAll();
-setTimeout(() => loadingScreen?.classList.add("hide"), 450);
+setTimeout(() => loadingScreen?.classList.add("hide"), 80);
