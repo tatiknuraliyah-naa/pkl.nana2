@@ -1807,6 +1807,15 @@ document.querySelector("#buyerLoginPassword")?.addEventListener("keyup", (event)
 });
 
 demoBuyerLogin?.addEventListener("click", () => {
+  const savedDemo = buyers.find((buyer) => buyer.email.toLowerCase() === demoBuyer.email.toLowerCase());
+  if (savedDemo) {
+    Object.assign(savedDemo, { ...demoBuyer, photoHistory: savedDemo.photoHistory || [] });
+  } else {
+    buyers.unshift({ ...demoBuyer });
+  }
+  saveBuyers();
+  document.querySelector("#buyerLoginEmail").value = demoBuyer.email;
+  document.querySelector("#buyerLoginPassword").value = demoBuyer.password;
   loginBuyer(demoBuyer.email, demoBuyer.password);
 });
 
@@ -2205,4 +2214,4 @@ loadSavedData();
 syncAdminAccess();
 applySession();
 renderAll();
-setTimeout(() => loadingScreen?.classList.add("hide"), 80);
+setTimeout(() => loadingScreen?.classList.add("hide"), 1700);
