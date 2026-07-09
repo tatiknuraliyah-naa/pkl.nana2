@@ -936,6 +936,13 @@ textarea {
   color: var(--ink);
 }
 
+input[aria-invalid="true"],
+select[aria-invalid="true"],
+textarea[aria-invalid="true"] {
+  border-color: var(--warm-dark);
+  box-shadow: 0 0 0 3px rgba(185, 87, 42, 0.14);
+}
+
 textarea {
   resize: vertical;
 }

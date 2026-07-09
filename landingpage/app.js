@@ -842,6 +842,11 @@ function setText(selector, message = "") {
   if (element) element.textContent = message;
 }
 
+function showLoginError(selector, message) {
+  setText(selector, message);
+  showToast(message);
+}
+
 function checkoutCosts() {
   const subtotal = cartValue();
   const fulfillment = document.querySelector("#fulfillment")?.value || "Regular";
@@ -938,29 +943,38 @@ function loginBuyer(email, password) {
   const normalizedEmail = email.trim().toLowerCase();
   setText("#buyerLoginEmailMessage");
   setText("#buyerLoginPasswordMessage");
+  const buyerEmailInput = document.querySelector("#buyerLoginEmail");
+  const buyerPasswordInput = document.querySelector("#buyerLoginPassword");
+  buyerEmailInput?.removeAttribute("aria-invalid");
+  buyerPasswordInput?.removeAttribute("aria-invalid");
 
   if (!normalizedEmail) {
-    setText("#buyerLoginEmailMessage", "Email is required.");
+    buyerEmailInput?.setAttribute("aria-invalid", "true");
+    showLoginError("#buyerLoginEmailMessage", "Email is required.");
     return;
   }
   if (!password) {
-    setText("#buyerLoginPasswordMessage", "Password is required.");
+    buyerPasswordInput?.setAttribute("aria-invalid", "true");
+    showLoginError("#buyerLoginPasswordMessage", "Password is required.");
     return;
   }
   if (!isValidEmail(normalizedEmail)) {
-    setText("#buyerLoginEmailMessage", "Invalid email format.");
+    buyerEmailInput?.setAttribute("aria-invalid", "true");
+    showLoginError("#buyerLoginEmailMessage", "Invalid email format.");
     return;
   }
 
   const buyer = buyers.find((item) => item.email.toLowerCase() === normalizedEmail);
 
   if (!buyer) {
-    setText("#buyerLoginEmailMessage", "Email is not registered.");
+    buyerEmailInput?.setAttribute("aria-invalid", "true");
+    showLoginError("#buyerLoginEmailMessage", "Email is not registered.");
     return;
   }
 
   if (buyer.password !== password) {
-    setText("#buyerLoginPasswordMessage", "Incorrect password.");
+    buyerPasswordInput?.setAttribute("aria-invalid", "true");
+    showLoginError("#buyerLoginPasswordMessage", "Incorrect password.");
     return;
   }
 
