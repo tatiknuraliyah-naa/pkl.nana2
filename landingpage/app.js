@@ -22,6 +22,7 @@ const allowedStatusTransitions = {
   Cancelled: [],
 };
 let checkoutInProgress = false;
+let notificationAudioUnlocked = false;
 
 function safeParse(value, fallback = null) {
   try {
@@ -37,7 +38,7 @@ function makeId(prefix) {
 }
 
 function playAdminNotificationSound() {
-  if (!appSettings.notifications || currentSession?.role !== "admin") return;
+  if (!notificationAudioUnlocked || !appSettings.notifications || currentSession?.role !== "admin") return;
   try {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     if (!AudioContext) return;
@@ -57,6 +58,12 @@ function playAdminNotificationSound() {
   } catch {
     // Browsers may block sound until the admin has interacted with the page.
   }
+}
+
+// Modern browsers require a user gesture before playing sound. Unlocking once
+// means later real-time order notifications can play without a button click.
+function unlockNotificationAudio() {
+  notificationAudioUnlocked = true;
 }
 
 const categorySearchTags = {
@@ -2734,6 +2741,9 @@ document.querySelector("#adminSettingsForm")?.addEventListener("submit", (event)
 });
 
 document.querySelector("#printReport")?.addEventListener("click", () => window.print());
+
+document.addEventListener("pointerdown", unlockNotificationAudio, { once: true, passive: true });
+document.addEventListener("keydown", unlockNotificationAudio, { once: true });
 
 window.addEventListener("scroll", () => {
   scrollTopButton?.classList.toggle("show", window.scrollY > 300);
