@@ -13,6 +13,52 @@ const statusFlow = [
   "Cancelled",
 ];
 
+const allowedStatusTransitions = {
+  Pending: ["Processing", "Cancelled"],
+  Processing: ["Ready for Pickup", "Delivered", "Cancelled"],
+  "Ready for Pickup": ["Completed", "Cancelled"],
+  Delivered: ["Completed", "Cancelled"],
+  Completed: [],
+  Cancelled: [],
+};
+let checkoutInProgress = false;
+
+function safeParse(value, fallback = null) {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return fallback;
+  }
+}
+
+function makeId(prefix) {
+  if (globalThis.crypto?.randomUUID) return `${prefix}-${crypto.randomUUID()}`;
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 12)}`;
+}
+
+function playAdminNotificationSound() {
+  if (!appSettings.notifications || currentSession?.role !== "admin") return;
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    const context = new AudioContext();
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(880, context.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(660, context.currentTime + 0.18);
+    gain.gain.setValueAtTime(0.0001, context.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.12, context.currentTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + 0.28);
+    oscillator.connect(gain).connect(context.destination);
+    oscillator.start();
+    oscillator.stop(context.currentTime + 0.3);
+    oscillator.addEventListener("ended", () => context.close());
+  } catch {
+    // Browsers may block sound until the admin has interacted with the page.
+  }
+}
+
 const categorySearchTags = {
   Bread: "bread roti roti manis roti tawar bun loaf garlic",
   Pastry: "pastry croissant danish cinnamon roll",
@@ -618,7 +664,7 @@ let orders = [
     fulfillment: "Ambil di toko",
     payment: "Bayar di toko",
     note: "Ambil pukul 16.00",
-    status: "Diproses",
+    status: "Processing",
     total: 56000,
     items: [
       { name: "Butter Croissant", quantity: 2, price: 18000 },
@@ -755,21 +801,22 @@ const adminAccount = {
 let pendingDeleteProductId = null;
 let pendingAction = null;
 
-function loadSavedData() {
-  const savedOrders = JSON.parse(localStorage.getItem(storageKeys.orders) || "null");
-  const savedStocks = JSON.parse(localStorage.getItem(storageKeys.productStocks) || "null");
-  const savedBuyers = JSON.parse(localStorage.getItem(storageKeys.buyers) || "null");
+function loadSavedData(persistMigration = true) {
+  const savedOrders = safeParse(localStorage.getItem(storageKeys.orders), null);
+  const savedStocks = safeParse(localStorage.getItem(storageKeys.productStocks), null);
+  const savedBuyers = safeParse(localStorage.getItem(storageKeys.buyers), null);
   const savedSession =
-    JSON.parse(localStorage.getItem(storageKeys.currentSession) || "null") ||
-    JSON.parse(sessionStorage.getItem(storageKeys.currentSession) || "null");
-  const savedStoreHours = JSON.parse(localStorage.getItem(storageKeys.storeHours) || "null");
-  const savedWishlist = JSON.parse(localStorage.getItem(storageKeys.wishlist) || "null");
-  const savedSettings = JSON.parse(localStorage.getItem(storageKeys.settings) || "null");
-  const savedCustomProducts = JSON.parse(localStorage.getItem(storageKeys.customProducts) || "null");
-  const savedNotifications = JSON.parse(localStorage.getItem(storageKeys.notifications) || "null");
+    safeParse(localStorage.getItem(storageKeys.currentSession), null) ||
+    safeParse(sessionStorage.getItem(storageKeys.currentSession), null);
+  const savedStoreHours = safeParse(localStorage.getItem(storageKeys.storeHours), null);
+  const savedWishlist = safeParse(localStorage.getItem(storageKeys.wishlist), null);
+  const savedSettings = safeParse(localStorage.getItem(storageKeys.settings), null);
+  const savedCustomProducts = safeParse(localStorage.getItem(storageKeys.customProducts), null);
+  const savedNotifications = safeParse(localStorage.getItem(storageKeys.notifications), null);
 
   if (Array.isArray(savedOrders)) {
-    orders = savedOrders;
+    const seen = new Set();
+    orders = savedOrders.filter((order) => order && typeof order.id === "string" && !seen.has(order.id) && (seen.add(order.id), true));
   }
 
   if (Array.isArray(savedCustomProducts)) {
@@ -792,7 +839,7 @@ function loadSavedData() {
     photo: buyer.photo || "logo.png",
     photoHistory: Array.isArray(buyer.photoHistory) ? buyer.photoHistory : [],
   }));
-  saveBuyers();
+  if (persistMigration) saveBuyers();
 
   if (savedSession && typeof savedSession === "object") {
     currentSession = savedSession;
@@ -814,7 +861,7 @@ function loadSavedData() {
 
   wishlist = Array.isArray(savedWishlist) ? savedWishlist : [];
   notifications = Array.isArray(savedNotifications) ? savedNotifications : [];
-  ensureDefaultNotifications();
+  if (persistMigration) ensureDefaultNotifications();
   if (savedSettings && typeof savedSettings === "object") {
     appSettings = { ...appSettings, ...savedSettings };
   }
@@ -923,8 +970,10 @@ function notificationTime() {
 }
 
 function addNotification(target, payload) {
+  const eventKey = payload.eventKey || null;
+  if (eventKey && notifications.some((item) => item.eventKey === eventKey)) return;
   const notification = {
-    id: `notif-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    id: makeId("notif"),
     target,
     buyerId: payload.buyerId || null,
     icon: payload.icon || "🔔",
@@ -932,11 +981,13 @@ function addNotification(target, payload) {
     description: payload.description,
     time: notificationTime(),
     read: false,
+    eventKey,
   };
   notifications.unshift(notification);
   notifications = notifications.slice(0, 80);
   saveNotifications();
   renderNotifications();
+  if (target === "admin") playAdminNotificationSound();
 }
 
 function ensureDefaultNotifications() {
@@ -1934,6 +1985,7 @@ function renderNewProductCategories() {
 
 function submitOrder(event) {
   event.preventDefault();
+  if (checkoutInProgress) return;
   const buyer = currentBuyer();
   if (!buyer) {
     showToast("Login sebagai pembeli dulu sebelum checkout.");
@@ -1945,15 +1997,35 @@ function submitOrder(event) {
     return;
   }
 
+  const customer = document.querySelector("#checkoutCustomerName")?.value.trim() || buyer.name;
+  const phone = document.querySelector("#checkoutCustomerPhone")?.value.trim() || buyer.phone;
+  const address = document.querySelector("#checkoutAddress")?.value.trim();
+  const fulfillment = document.querySelector("#fulfillment")?.value;
+  const payment = document.querySelector("#paymentMethod")?.value;
+  if (!customer || !phone || !address || !fulfillment || !payment) {
+    showToast("Lengkapi nama, nomor HP, alamat, pengiriman, dan metode pembayaran.");
+    return;
+  }
+
+  for (const item of cart) {
+    const product = products.find((entry) => entry.id === item.id);
+    if (!product || !Number.isInteger(item.quantity) || item.quantity < 1 || item.quantity > product.stock) {
+      showToast(`${item.name || "Produk"} tidak tersedia dalam jumlah yang diminta. Periksa stok lalu coba lagi.`);
+      renderCart();
+      return;
+    }
+  }
+  checkoutInProgress = true;
+
   const order = {
-    id: `TR-${new Date().toISOString().slice(2, 10).replace(/-/g, "")}-${String(orders.length + 1).padStart(3, "0")}`,
+    id: makeId("TR"),
     createdAt: new Date().toISOString(),
     buyerId: buyer.id,
-    customer: document.querySelector("#checkoutCustomerName").value.trim() || buyer.name,
-    phone: document.querySelector("#checkoutCustomerPhone").value.trim() || buyer.phone,
-    address: document.querySelector("#checkoutAddress").value.trim(),
-    fulfillment: document.querySelector("#fulfillment").value,
-    payment: document.querySelector("#paymentMethod").value,
+    customer,
+    phone,
+    address,
+    fulfillment,
+    payment,
     note: document.querySelector("#orderNote").value.trim(),
     status: "Pending",
     subtotal: checkoutCosts().subtotal,
@@ -1975,16 +2047,13 @@ function submitOrder(event) {
     icon: "📦",
     title: "Pesanan diterima",
     description: "Pesanan Anda telah kami terima.",
+    eventKey: `order-created-buyer-${order.id}`,
   });
   addNotification("admin", {
     icon: "📦",
     title: "Ada Pesanan Baru",
     description: `${order.customer} membuat pesanan ${order.id}.`,
-  });
-  addNotification("admin", {
-    icon: "💳",
-    title: "Pembayaran berhasil",
-    description: `Pembayaran ${order.payment} untuk ${order.id} tercatat.`,
+    eventKey: `order-created-admin-${order.id}`,
   });
   saveOrders();
   saveStocks();
@@ -1993,6 +2062,7 @@ function submitOrder(event) {
   renderAll();
   showToast("Checkout Success.");
   switchView("orders");
+  checkoutInProgress = false;
 }
 
 function switchView(viewName) {
@@ -2476,8 +2546,20 @@ adminOrders?.addEventListener("click", (event) => {
 
 function updateOrderStatus(orderId, status) {
   const order = orders.find((item) => item.id === orderId);
-  if (!order) return;
+  if (!order || !statusFlow.includes(status) || order.status === status) return;
+  if (!(allowedStatusTransitions[order.status] || []).includes(status)) {
+    showToast("Perubahan status tersebut tidak valid untuk pesanan ini.");
+    return;
+  }
+  const previousStatus = order.status;
   order.status = status;
+  if (status === "Cancelled" && previousStatus !== "Cancelled") {
+    order.items.forEach((item) => {
+      const product = products.find((entry) => entry.id === item.id);
+      if (product) product.stock += Math.max(0, Number(item.quantity) || 0);
+    });
+    saveStocks();
+  }
   saveOrders();
   const message = statusMessages[status];
   if (message) {
@@ -2486,6 +2568,7 @@ function updateOrderStatus(orderId, status) {
       icon: message[0],
       title: message[1],
       description: message[2],
+      eventKey: `order-status-buyer-${order.id}-${status}`,
     });
   }
   if (status === "Cancelled" || status === "Ready for Pickup") {
@@ -2493,6 +2576,7 @@ function updateOrderStatus(orderId, status) {
       icon: status === "Cancelled" ? "✕" : "✅",
       title: status === "Cancelled" ? "Pesanan Dibatalkan" : "Pesanan Siap Diambil",
       description: `${order.id} - ${order.customer}`,
+      eventKey: `order-status-admin-${order.id}-${status}`,
     });
   }
   renderAll();
@@ -2675,6 +2759,17 @@ logoutAdmin?.addEventListener("click", () => {
   saveSession();
   syncAdminAccess();
   showToast("Admin sudah logout.");
+});
+
+// Keeps separate tabs on the same browser in sync. This is intentionally only a
+// local-development fallback; localStorage cannot synchronize separate devices.
+window.addEventListener("storage", (event) => {
+  if (!Object.values(storageKeys).includes(event.key)) return;
+  const previousOrderIds = new Set(orders.map((order) => order.id));
+  loadSavedData(false);
+  const receivedNewOrder = currentSession?.role === "admin" && orders.some((order) => !previousOrderIds.has(order.id));
+  renderAll();
+  if (receivedNewOrder) playAdminNotificationSound();
 });
 
 loadSavedData();
