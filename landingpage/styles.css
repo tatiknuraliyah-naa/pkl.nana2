@@ -133,6 +133,78 @@ button {
     url("https://i.pinimg.com/1200x/2d/77/79/2d777957670fd2830148f096f4847b68.jpg") center/cover;
 }
 
+.public-landing {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.landing-section {
+  border: 1px solid rgba(127, 50, 29, 0.14);
+  border-radius: 8px;
+  padding: 18px;
+  background: rgba(255, 250, 243, 0.86);
+  box-shadow: 0 10px 36px rgba(70, 44, 24, 0.06);
+}
+
+.landing-section:first-child,
+.landing-grid,
+.public-footer {
+  grid-column: 1 / -1;
+}
+
+.landing-categories div,
+.minimal-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.landing-categories span {
+  border-radius: 999px;
+  padding: 7px 10px;
+  background: #fff3df;
+  color: var(--warm-dark);
+  font-weight: 800;
+}
+
+.landing-products {
+  grid-column: span 2;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.landing-products .eyebrow {
+  grid-column: 1 / -1;
+}
+
+.landing-products article {
+  display: grid;
+  gap: 8px;
+}
+
+.landing-products img {
+  width: 100%;
+  aspect-ratio: 1.25;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.landing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.landing-grid > div {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+  background: #fff;
+}
+
 .auth-visual {
   display: flex;
   flex-direction: column;
@@ -416,6 +488,7 @@ button {
 }
 
 .nav-item {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -428,6 +501,17 @@ button {
   color: rgba(255, 249, 239, 0.78);
   text-align: left;
   text-decoration: none;
+}
+
+.nav-badge {
+  margin-left: auto;
+  min-width: 22px;
+  border-radius: 999px;
+  padding: 2px 6px;
+  background: var(--warm);
+  color: #fff;
+  font-size: 0.72rem;
+  text-align: center;
 }
 
 .nav-item.active,
@@ -462,6 +546,51 @@ button {
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 24px;
+}
+
+.admin-header-tools {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  min-width: min(620px, 100%);
+}
+
+.compact-search {
+  min-height: 44px;
+  max-width: 260px;
+}
+
+.admin-avatar-button {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 5px 10px 5px 5px;
+  background: var(--surface);
+  color: var(--ink);
+  text-align: left;
+}
+
+.admin-avatar-button img {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.admin-avatar-button span,
+.admin-avatar-button small {
+  display: block;
+}
+
+.admin-avatar-button small {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 800;
 }
 
 .eyebrow {
@@ -652,12 +781,27 @@ h3 {
 }
 
 .newsletter-card {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(180px, 260px) auto;
-  align-items: end;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 14px;
   margin-top: 18px;
   padding: 18px;
+}
+
+.newsletter-card a,
+.minimal-footer a {
+  color: var(--warm-dark);
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.minimal-footer {
+  align-items: center;
+  margin-top: 18px;
+  border-top: 1px solid var(--line);
+  padding: 18px 0 4px;
+  color: var(--muted);
 }
 
 .contact-card {
@@ -761,6 +905,8 @@ h3 {
 }
 
 .product-card {
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   transition: transform 160ms ease, box-shadow 160ms ease;
 }
@@ -801,11 +947,15 @@ h3 {
 }
 
 .product-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   padding: 14px;
 }
 
 .product-info {
   min-height: 88px;
+  flex: 1;
 }
 
 .product-meta,
@@ -1038,6 +1188,51 @@ textarea {
 .stat-card.monthly {
   grid-column: span 2;
   background: #fff3df;
+}
+
+.dashboard-panels {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 14px;
+}
+
+.dashboard-panels .store-hours-card:last-child {
+  grid-column: 1 / -1;
+}
+
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  align-items: end;
+  gap: 8px;
+  min-height: 180px;
+}
+
+.chart-grid div {
+  display: grid;
+  align-items: end;
+  gap: 8px;
+  height: 100%;
+}
+
+.chart-grid span {
+  display: block;
+  min-height: 24px;
+  border-radius: 8px 8px 2px 2px;
+  background: linear-gradient(180deg, var(--gold), var(--warm));
+}
+
+.chart-grid small,
+.activity-list {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.activity-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding-left: 18px;
 }
 
 .stat-card small {
@@ -1298,7 +1493,6 @@ textarea {
   object-fit: cover;
 }
 
-.floating-whatsapp,
 .scroll-top {
   position: fixed;
   z-index: 12;
@@ -1311,13 +1505,6 @@ textarea {
   text-decoration: none;
   font-weight: 900;
   box-shadow: var(--shadow);
-}
-
-.floating-whatsapp {
-  right: 22px;
-  bottom: 84px;
-  background: var(--warm-dark);
-  color: #fff;
 }
 
 .scroll-top {
@@ -1419,6 +1606,18 @@ textarea {
     flex-direction: column;
   }
 
+  .admin-header-tools {
+    justify-content: stretch;
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+
+  .compact-search,
+  .admin-avatar-button {
+    max-width: none;
+    flex: 1 1 220px;
+  }
+
   .toolbar {
     grid-template-columns: 1fr;
   }
@@ -1426,7 +1625,10 @@ textarea {
   .product-grid,
   .admin-layout,
   .admin-products,
-  .stats-grid {
+  .stats-grid,
+  .public-landing,
+  .landing-grid,
+  .dashboard-panels {
     grid-template-columns: 1fr 1fr;
   }
 }
@@ -1561,8 +1763,26 @@ textarea {
   .content-grid,
   .gallery-strip,
   .newsletter-card,
+  .public-landing,
+  .landing-products,
+  .landing-grid,
+  .dashboard-panels,
   .form-row {
     grid-template-columns: 1fr;
+  }
+
+  .landing-products,
+  .landing-section:first-child,
+  .landing-grid,
+  .public-footer {
+    grid-column: auto;
+  }
+
+  .newsletter-card,
+  .minimal-footer,
+  .admin-header-tools {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .promo-banner,

@@ -179,6 +179,35 @@
                     type="submit">Masuk Admin</button>
         </form>
     </div>
+
+    <div class="public-landing">
+        <section class="landing-section">
+            <p class="eyebrow">About</p>
+            <h2>Serenyt Bakery Management System</h2>
+            <p>Fresh bakery storefront, customer checkout, order tracking, stock control, and admin reporting in one warm, portfolio-ready application.</p>
+        </section>
+        <section class="landing-section landing-categories">
+            <p class="eyebrow">Categories</p>
+            <div>
+                <span>Bread</span><span>Pastry</span><span>Donuts</span><span>Cakes</span><span>Coffee</span><span>Baker's Box</span>
+            </div>
+        </section>
+        <section class="landing-section landing-products">
+            <p class="eyebrow">Featured Products</p>
+            <article><img src="https://i.pinimg.com/1200x/56/22/39/562239e127eaa2f88054c6b2d39ee0df.jpg" alt="Butter Croissant"><strong>Butter Croissant</strong></article>
+            <article><img src="https://i.pinimg.com/736x/ad/c2/ed/adc2edd4df873d006cf187b37a2cc103.jpg" alt="Baker's Box"><strong>Best Seller Box</strong></article>
+            <article><img src="https://i.pinimg.com/1200x/fa/ba/df/fabadf995bd65e8010b385456e9cd859.jpg" alt="Chocolate Cake"><strong>Chocolate Cake</strong></article>
+        </section>
+        <section class="landing-section landing-grid">
+            <div><p class="eyebrow">Promotions</p><h3>SERENYT10</h3><p>Diskon 10% untuk checkout pertama.</p></div>
+            <div><p class="eyebrow">Testimonials</p><h3>Fresh and reliable.</h3><p>Rated 4.8 by local customers.</p></div>
+            <div><p class="eyebrow">FAQ</p><h3>Pickup or delivery?</h3><p>Both are available during checkout.</p></div>
+            <div><p class="eyebrow">Newsletter</p><h3>Menu updates</h3><p>Join after registration to receive promos.</p></div>
+            <div><p class="eyebrow">Contact</p><h3>hello@serenytbakery.com</h3><p>07.00 - 21.00 WIB</p></div>
+            <div><p class="eyebrow">Store Address</p><h3>Jl. Bakery Manis No. 7</h3><p>Jakarta, Indonesia</p></div>
+        </section>
+        <footer class="minimal-footer public-footer">© 2026 Serenyt Bakery</footer>
+    </div>
 </section>
 
 <div class="app-shell"
@@ -227,6 +256,7 @@
                     type="button">
                 ♡
                 <span>Wishlist</span>
+                <strong class="nav-badge" id="wishlistCount">0</strong>
             </button>
             <button class="nav-item buyer-only"
                     data-view="profile"
@@ -272,6 +302,16 @@
                 <br>
                 <p class="hero-desc"
                    id="pageSubtitle">Bakery • Drinks • Desserts</p>
+            </div>
+
+            <div class="admin-header-tools admin-only">
+                <label class="search-box compact-search">🔍<input type="search" placeholder="Search dashboard"></label>
+                <button class="icon-button" type="button" aria-label="Notifications">🔔</button>
+                <button class="icon-button" id="quickDarkMode" type="button" aria-label="Dark mode">◐</button>
+                <button class="admin-avatar-button" type="button">
+                    <img src="logo.png" alt="Admin avatar">
+                    <span><strong>Serenyt Admin</strong><small>Administrator • Online</small></span>
+                </button>
             </div>
 
             <button class="cart-button buyer-only"
@@ -363,18 +403,24 @@
 
             <form class="newsletter-card" id="newsletterForm">
                 <div>
-                    <p class="eyebrow">Newsletter</p>
-                    <h2>Dapatkan info menu baru.</h2>
+                    <p class="eyebrow">Follow Us</p>
+                    <h2>Temukan menu baru Serenyt.</h2>
                 </div>
-                <input id="newsletterEmail" type="email" placeholder="email@example.com" required>
-                <button class="primary-button" type="submit">Subscribe</button>
+                <a href="#" aria-label="Instagram">Instagram</a>
+                <a href="#" aria-label="TikTok">TikTok</a>
+                <a href="#" aria-label="Facebook">Facebook</a>
             </form>
 
-            <section class="contact-card">
-                <p class="eyebrow">Contact</p>
-                <h2>Jl. Bakery Manis No. 7</h2>
-                <p>WhatsApp 0895-3853-94138 • Instagram @serenytbakery</p>
-            </section>
+            <footer class="minimal-footer">
+                <span>© 2026 Serenyt Bakery</span>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms & Conditions</a>
+                <a href="#">Help Center</a>
+                <strong>Follow Us</strong>
+                <a href="#">Instagram</a>
+                <a href="#">TikTok</a>
+                <a href="#">Facebook</a>
+            </footer>
         </section>
 
         <section class="view"
@@ -505,11 +551,26 @@
                         data-admin-page="customers"
                         type="button">Customers</button>
                 <button class="admin-tab"
+                        data-admin-page="categories"
+                        type="button">Categories</button>
+                <button class="admin-tab"
+                        data-admin-page="inventory"
+                        type="button">Inventory</button>
+                <button class="admin-tab"
+                        data-admin-page="promotions"
+                        type="button">Promotions</button>
+                <button class="admin-tab"
+                        data-admin-page="reviews"
+                        type="button">Reviews</button>
+                <button class="admin-tab"
                         data-admin-page="reports"
                         type="button">Reports</button>
                 <button class="admin-tab"
                         data-admin-page="settings"
                         type="button">Settings</button>
+                <button class="admin-tab"
+                        data-admin-page="profile"
+                        type="button">Profile</button>
             </div>
 
             <section class="admin-page active"
@@ -521,6 +582,36 @@
 
                 <div class="stats-grid"
                      id="adminStats">
+                </div>
+
+                <div class="dashboard-panels">
+                    <section class="store-hours-card">
+                        <p class="eyebrow">Charts</p>
+                        <h2>Sales Overview</h2>
+                        <div class="chart-grid">
+                            <div><span style="height:55%"></span><small>Mon</small></div>
+                            <div><span style="height:72%"></span><small>Tue</small></div>
+                            <div><span style="height:44%"></span><small>Wed</small></div>
+                            <div><span style="height:82%"></span><small>Thu</small></div>
+                            <div><span style="height:64%"></span><small>Fri</small></div>
+                            <div><span style="height:90%"></span><small>Sat</small></div>
+                            <div><span style="height:70%"></span><small>Sun</small></div>
+                        </div>
+                    </section>
+                    <section class="store-hours-card">
+                        <p class="eyebrow">Recent Activity</p>
+                        <div id="recentActivity"></div>
+                    </section>
+                    <section class="store-hours-card">
+                        <p class="eyebrow">Quick Action</p>
+                        <div class="admin-actions">
+                            <button class="secondary-button" data-admin-page="products" type="button">Add Product</button>
+                            <button class="secondary-button" data-admin-page="orders" type="button">Manage Orders</button>
+                            <button class="secondary-button" data-admin-page="inventory" type="button">Inventory</button>
+                            <button class="secondary-button" data-admin-page="reports" type="button">Reports</button>
+                            <button class="secondary-button" data-admin-page="promotions" type="button">Create Promotion</button>
+                        </div>
+                    </section>
                 </div>
 
                 <form class="store-hours-card"
@@ -597,6 +688,26 @@
                 <div class="table-card" id="adminCustomers"></div>
             </section>
 
+            <section class="admin-page" id="adminCategoriesPage">
+                <div class="section-title"><h2>Categories</h2><p>Distribusi produk per kategori.</p></div>
+                <div class="table-card" id="adminCategories"></div>
+            </section>
+
+            <section class="admin-page" id="adminInventoryPage">
+                <div class="section-title"><h2>Inventory</h2><p>Current stock, incoming, outgoing, low stock, dan restock.</p></div>
+                <div class="table-card" id="adminInventory"></div>
+            </section>
+
+            <section class="admin-page" id="adminPromotionsPage">
+                <div class="section-title"><h2>Promotions</h2><p>Banner, discount, date range, dan status promo.</p></div>
+                <div class="table-card" id="adminPromotions"></div>
+            </section>
+
+            <section class="admin-page" id="adminReviewsPage">
+                <div class="section-title"><h2>Reviews</h2><p>Reply, hide, delete, dan highlight ulasan pelanggan.</p></div>
+                <div class="table-card" id="adminReviews"></div>
+            </section>
+
             <section class="admin-page" id="adminReportsPage">
                 <div class="section-title">
                     <h2>Reports</h2>
@@ -612,9 +723,20 @@
                     <h2>Bakery Profile</h2>
                     <input id="bakeryName" placeholder="Bakery Name" value="Serenyt Bakery">
                     <input id="bakeryPhone" placeholder="Phone" value="0812-8888-9999">
-                    <input id="bakeryEmail" type="email" placeholder="Email" value="hello@serenitybakery.com">
+                    <input id="bakeryEmail" type="email" placeholder="Email" value="hello@serenytbakery.com">
                     <textarea id="bakeryAddress" rows="3" placeholder="Business Address">Jl. Bakery Manis No. 7</textarea>
                     <button class="primary-button" type="submit">Save Settings</button>
+                </form>
+            </section>
+
+            <section class="admin-page" id="adminProfilePage">
+                <form class="profile-card">
+                    <p class="eyebrow">Administrator Profile</p>
+                    <h2>Serenyt Admin</h2>
+                    <input value="Admin Serenyt" aria-label="Admin name">
+                    <input value="admin@serenytbakery.com" aria-label="Admin email">
+                    <input value="0812-8888-9999" aria-label="Admin phone">
+                    <button class="primary-button" type="button">Save Profile</button>
                 </form>
             </section>
         </section>
@@ -730,7 +852,18 @@
     </form>
 </dialog>
 
-<a class="floating-whatsapp" href="https://wa.me/6281288889999" target="_blank" rel="noreferrer">WA</a>
+<dialog class="modal-card" id="deleteProductDialog">
+    <form class="profile-card" method="dialog">
+        <p class="eyebrow">Delete Product</p>
+        <h2>Hapus produk ini?</h2>
+        <p id="deleteProductName">Produk akan dihapus dari katalog.</p>
+        <div class="admin-actions">
+            <button class="secondary-button" value="cancel" type="submit">Cancel</button>
+            <button class="primary-button" id="confirmDeleteProduct" value="delete" type="submit">Delete</button>
+        </div>
+    </form>
+</dialog>
+
 <button class="scroll-top" id="scrollTop" type="button">↑</button>
 
 <div class="toast"

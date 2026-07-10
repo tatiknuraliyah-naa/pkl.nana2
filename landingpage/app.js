@@ -7,8 +7,8 @@ const currency = new Intl.NumberFormat("id-ID", {
 const statusFlow = [
   "Pending",
   "Processing",
-  "Packed",
-  "Shipped",
+  "Ready for Pickup",
+  "Delivered",
   "Completed",
   "Cancelled",
 ];
@@ -594,6 +594,17 @@ let buyers = [];
 let currentSession = null;
 let wishlist = [];
 let customProducts = [];
+let notifications = [];
+let adminOrderFilter = "Semua";
+let adminOrderSearch = "";
+let adminOrderDate = "";
+let adminPaymentFilter = "Semua";
+let adminOrderSort = "newest";
+let adminProductSearch = "";
+let adminProductCategoryFilter = "Semua";
+let adminProductSort = "name";
+let adminProductPage = 1;
+const adminProductPageSize = 9;
 let appSettings = {
   darkMode: false,
   notifications: true,
@@ -622,10 +633,13 @@ const storageKeys = {
   adminLoggedIn: "serenytAdminLoggedIn",
   buyers: "serenytBuyers",
   currentSession: "serenytCurrentSession",
+  sessionMode: "serenytSessionMode",
   storeHours: "serenytStoreHours",
   wishlist: "serenytWishlist",
   settings: "serenytSettings",
   customProducts: "serenytCustomProducts",
+  users: "serenytUsers",
+  notifications: "serenytNotifications",
 };
 
 let storeHours = {
@@ -648,7 +662,7 @@ const authScreen = document.querySelector("#authScreen");
 const appShell = document.querySelector("#appShell");
 const authTabs = document.querySelectorAll("[data-auth-tab]");
 const authPanels = document.querySelectorAll("[data-auth-panel]");
-const adminTabs = document.querySelectorAll("[data-admin-page]");
+const adminTabs = document.querySelectorAll(".admin-tab[data-admin-page]");
 const adminPages = document.querySelectorAll(".admin-page");
 const buyerLoginForm = document.querySelector("#buyerLoginForm");
 const buyerRegisterForm = document.querySelector("#buyerRegisterForm");
@@ -692,12 +706,27 @@ const photoHistory = document.querySelector("#photoHistory");
 const wishlistGrid = document.querySelector("#wishlistGrid");
 const sortProducts = document.querySelector("#sortProducts");
 const checkoutSummary = document.querySelector("#checkoutSummary");
+const wishlistCount = document.querySelector("#wishlistCount");
+const customerNotificationCount = document.querySelector("#customerNotificationCount");
+const customerHeaderNotificationCount = document.querySelector("#customerHeaderNotificationCount");
+const adminNotificationCount = document.querySelector("#adminNotificationCount");
+const customerNotifications = document.querySelector("#customerNotifications");
+const adminNotifications = document.querySelector("#adminNotifications");
+const customerHeaderName = document.querySelector("#customerHeaderName");
+const customerHeaderPhoto = document.querySelector("#customerHeaderPhoto");
 const forgotPasswordDialog = document.querySelector("#forgotPasswordDialog");
 const productDetailDialog = document.querySelector("#productDetailDialog");
 const productDetailContent = document.querySelector("#productDetailContent");
 const logoutDialog = document.querySelector("#logoutDialog");
+const deleteProductDialog = document.querySelector("#deleteProductDialog");
+const deleteProductName = document.querySelector("#deleteProductName");
 const adminCustomers = document.querySelector("#adminCustomers");
 const adminReports = document.querySelector("#adminReports");
+const adminCategories = document.querySelector("#adminCategories");
+const adminInventory = document.querySelector("#adminInventory");
+const adminPromotions = document.querySelector("#adminPromotions");
+const adminReviews = document.querySelector("#adminReviews");
+const recentActivity = document.querySelector("#recentActivity");
 const addProductForm = document.querySelector("#addProductForm");
 const newProductCategory = document.querySelector("#newProductCategory");
 const darkModeToggle = document.querySelector("#darkModeToggle");
@@ -705,22 +734,39 @@ const notificationToggle = document.querySelector("#notificationToggle");
 const languageSelect = document.querySelector("#languageSelect");
 const scrollTopButton = document.querySelector("#scrollTop");
 const loadingScreen = document.querySelector("#loadingScreen");
+const adminGreeting = document.querySelector("#adminGreeting");
+const bestSellerList = document.querySelector("#bestSellerList");
+const latestOrders = document.querySelector("#latestOrders");
+const lowStockList = document.querySelector("#lowStockList");
+const productPageInfo = document.querySelector("#productPageInfo");
+const adminProductCategoryFilterElement = document.querySelector("#adminProductCategoryFilter");
+const confirmActionDialog = document.querySelector("#confirmActionDialog");
+const confirmActionTitle = document.querySelector("#confirmActionTitle");
+const confirmActionMessage = document.querySelector("#confirmActionMessage");
 
 const adminAccount = {
-  email: "admin@serenitybakery.com",
+  id: "admin-default",
+  name: "Serenyt Admin",
+  email: "admin@serenytbakery.com",
   password: "Admin123",
   role: "Administrator",
 };
+
+let pendingDeleteProductId = null;
+let pendingAction = null;
 
 function loadSavedData() {
   const savedOrders = JSON.parse(localStorage.getItem(storageKeys.orders) || "null");
   const savedStocks = JSON.parse(localStorage.getItem(storageKeys.productStocks) || "null");
   const savedBuyers = JSON.parse(localStorage.getItem(storageKeys.buyers) || "null");
-  const savedSession = JSON.parse(localStorage.getItem(storageKeys.currentSession) || "null");
+  const savedSession =
+    JSON.parse(localStorage.getItem(storageKeys.currentSession) || "null") ||
+    JSON.parse(sessionStorage.getItem(storageKeys.currentSession) || "null");
   const savedStoreHours = JSON.parse(localStorage.getItem(storageKeys.storeHours) || "null");
   const savedWishlist = JSON.parse(localStorage.getItem(storageKeys.wishlist) || "null");
   const savedSettings = JSON.parse(localStorage.getItem(storageKeys.settings) || "null");
   const savedCustomProducts = JSON.parse(localStorage.getItem(storageKeys.customProducts) || "null");
+  const savedNotifications = JSON.parse(localStorage.getItem(storageKeys.notifications) || "null");
 
   if (Array.isArray(savedOrders)) {
     orders = savedOrders;
@@ -737,6 +783,10 @@ function loadSavedData() {
   if (!buyers.some((buyer) => buyer.email === demoBuyer.email)) {
     buyers.unshift({ ...demoBuyer });
   }
+  localStorage.setItem(storageKeys.users, JSON.stringify([
+    ...buyers.map((buyer) => ({ ...buyer, role: "Customer" })),
+    { ...adminAccount },
+  ]));
   buyers = buyers.map((buyer) => ({
     ...buyer,
     photo: buyer.photo || "logo.png",
@@ -763,6 +813,8 @@ function loadSavedData() {
   }
 
   wishlist = Array.isArray(savedWishlist) ? savedWishlist : [];
+  notifications = Array.isArray(savedNotifications) ? savedNotifications : [];
+  ensureDefaultNotifications();
   if (savedSettings && typeof savedSettings === "object") {
     appSettings = { ...appSettings, ...savedSettings };
   }
@@ -771,14 +823,24 @@ function loadSavedData() {
 
 function saveBuyers() {
   localStorage.setItem(storageKeys.buyers, JSON.stringify(buyers));
+  localStorage.setItem(storageKeys.users, JSON.stringify([
+    ...buyers.map((buyer) => ({ ...buyer, role: "Customer" })),
+    { ...adminAccount },
+  ]));
 }
 
-function saveSession() {
+function saveSession(mode = localStorage.getItem(storageKeys.sessionMode) || "local") {
+  localStorage.removeItem(storageKeys.currentSession);
+  sessionStorage.removeItem(storageKeys.currentSession);
   if (currentSession) {
-    localStorage.setItem(storageKeys.currentSession, JSON.stringify(currentSession));
+    const storage = mode === "session" ? sessionStorage : localStorage;
+    storage.setItem(storageKeys.currentSession, JSON.stringify(currentSession));
+    localStorage.setItem(storageKeys.sessionMode, mode);
     return;
   }
   localStorage.removeItem(storageKeys.currentSession);
+  sessionStorage.removeItem(storageKeys.currentSession);
+  localStorage.removeItem(storageKeys.sessionMode);
 }
 
 function saveOrders() {
@@ -807,6 +869,10 @@ function saveWishlist() {
 
 function saveSettings() {
   localStorage.setItem(storageKeys.settings, JSON.stringify(appSettings));
+}
+
+function saveNotifications() {
+  localStorage.setItem(storageKeys.notifications, JSON.stringify(notifications));
 }
 
 function applySettings() {
@@ -847,6 +913,131 @@ function showLoginError(selector, message) {
   showToast(message);
 }
 
+function notificationTime() {
+  return new Intl.DateTimeFormat("id-ID", {
+    hour: "2-digit",
+    minute: "2-digit",
+    day: "2-digit",
+    month: "short",
+  }).format(new Date());
+}
+
+function addNotification(target, payload) {
+  const notification = {
+    id: `notif-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    target,
+    buyerId: payload.buyerId || null,
+    icon: payload.icon || "🔔",
+    title: payload.title,
+    description: payload.description,
+    time: notificationTime(),
+    read: false,
+  };
+  notifications.unshift(notification);
+  notifications = notifications.slice(0, 80);
+  saveNotifications();
+  renderNotifications();
+}
+
+function ensureDefaultNotifications() {
+  if (notifications.length) return;
+  notifications = [
+    {
+      id: "notif-promo-default",
+      target: "buyer",
+      buyerId: null,
+      icon: "🎁",
+      title: "Promo baru tersedia",
+      description: "Gunakan voucher SERENYT10 untuk diskon 10%.",
+      time: notificationTime(),
+      read: false,
+    },
+    {
+      id: "notif-admin-stock-default",
+      target: "admin",
+      buyerId: null,
+      icon: "⚠",
+      title: "Produk hampir habis",
+      description: "Pantau produk stok rendah di dashboard.",
+      time: notificationTime(),
+      read: false,
+    },
+  ];
+  saveNotifications();
+}
+
+function visibleNotifications(target) {
+  const buyer = currentBuyer();
+  return notifications.filter((item) => {
+    if (target === "admin") return item.target === "admin";
+    return item.target === "buyer" && (!item.buyerId || item.buyerId === buyer?.id);
+  });
+}
+
+function unreadNotificationCount(target) {
+  return visibleNotifications(target).filter((item) => !item.read).length;
+}
+
+function renderNotificationList(container, target) {
+  if (!container) return;
+  const items = visibleNotifications(target);
+  if (!items.length) {
+    container.innerHTML = `<div class="empty-state">Belum ada notifikasi. Semua tenang dan rapi.</div>`;
+    return;
+  }
+  container.innerHTML = items
+    .map(
+      (item) => `
+        <article class="notification-item ${item.read ? "" : "unread"}" data-notification-id="${item.id}">
+          <button class="notification-select" data-toggle-notification="${item.id}" type="button" aria-label="Pilih notifikasi">${item.read ? "○" : "●"}</button>
+          <span class="notification-icon">${item.icon}</span>
+          <div>
+            <h3>${item.title}</h3>
+            <p>${item.description}</p>
+            <small>${item.time} • ${item.read ? "Read" : "Unread"}</small>
+          </div>
+        </article>
+      `,
+    )
+    .join("");
+}
+
+function renderNotifications() {
+  const customerUnread = unreadNotificationCount("buyer");
+  const adminUnread = unreadNotificationCount("admin");
+  if (customerNotificationCount) customerNotificationCount.textContent = customerUnread;
+  if (customerHeaderNotificationCount) customerHeaderNotificationCount.textContent = customerUnread;
+  if (adminNotificationCount) adminNotificationCount.textContent = adminUnread;
+  renderNotificationList(customerNotifications, "buyer");
+  renderNotificationList(adminNotifications, "admin");
+}
+
+function handleNotificationAction(target, action) {
+  const items = visibleNotifications(target);
+  if (action === "clear-all") {
+    notifications = notifications.filter((item) => !items.some((visible) => visible.id === item.id));
+    showToast("Notifikasi berhasil dihapus.");
+  } else {
+    const unread = items.filter((item) => !item.read);
+    const scope = action === "read-selected" ? unread.slice(0, 1) : unread;
+    scope.forEach((item) => {
+      item.read = true;
+    });
+    showToast("Notifikasi ditandai sudah dibaca.");
+  }
+  saveNotifications();
+  renderNotifications();
+}
+
+const statusMessages = {
+  Pending: ["📦", "Pesanan diterima", "Pesanan Anda telah kami terima."],
+  Processing: ["👩‍🍳", "Pesanan sedang diproses", "Pesanan Anda sedang kami siapkan."],
+  "Ready for Pickup": ["✅", "Pesanan siap diambil", "Pesanan Anda sudah siap diambil."],
+  Delivered: ["🛵", "Pesanan sedang dikirim", "Pesanan Anda sedang dikirim."],
+  Completed: ["✨", "Pesanan selesai", "Terima kasih telah berbelanja di Serenyt Bakery."],
+  Cancelled: ["✕", "Pesanan dibatalkan", "Pesanan Anda dibatalkan."],
+};
+
 function checkoutCosts() {
   const subtotal = cartValue();
   const fulfillment = document.querySelector("#fulfillment")?.value || "Regular";
@@ -885,8 +1076,14 @@ function switchAdminPage(pageName) {
     orders: ["Dashboard Admin", "Pesanan Masuk", "Kelola status pesanan pembeli."],
     products: ["Dashboard Admin", "Produk Toko", "Atur stok dan pantau menu."],
     customers: ["Dashboard Admin", "Customers", "Lihat pelanggan dan nilai pembelian."],
+    categories: ["Dashboard Admin", "Categories", "Pantau kategori dan distribusi produk."],
+    inventory: ["Dashboard Admin", "Inventory", "Kelola stok masuk, keluar, dan stok rendah."],
+    promotions: ["Dashboard Admin", "Promotions", "Atur banner, diskon, dan masa promo."],
+    reviews: ["Dashboard Admin", "Reviews", "Moderasi ulasan pelanggan."],
     reports: ["Dashboard Admin", "Reports", "Ringkasan performa toko."],
     settings: ["Dashboard Admin", "Settings", "Atur profil bisnis bakery."],
+    profile: ["Dashboard Admin", "Profile", "Kelola profil administrator."],
+    notifications: ["Dashboard Admin", "Notification Center", "Pantau notifikasi operasional toko."],
   };
   const [eyebrow, title, subtitle] = titles[pageName] || titles.stats;
   if (topEyebrow) topEyebrow.textContent = eyebrow;
@@ -894,14 +1091,14 @@ function switchAdminPage(pageName) {
   if (pageSubtitle) pageSubtitle.textContent = subtitle;
 }
 
-function setSession(session) {
+function setSession(session, mode = "local") {
   currentSession = session;
   if (session?.role === "admin") {
     localStorage.setItem(storageKeys.adminLoggedIn, "true");
   } else {
     localStorage.removeItem(storageKeys.adminLoggedIn);
   }
-  saveSession();
+  saveSession(mode);
   applySession();
 }
 
@@ -939,7 +1136,7 @@ function applySession() {
   renderAll();
 }
 
-function loginBuyer(email, password) {
+function loginBuyer(email, password, remember = true) {
   const normalizedEmail = email.trim().toLowerCase();
   setText("#buyerLoginEmailMessage");
   setText("#buyerLoginPasswordMessage");
@@ -978,7 +1175,7 @@ function loginBuyer(email, password) {
     return;
   }
 
-  setSession({ role: "buyer", id: buyer.id, name: buyer.name });
+  setSession({ role: "buyer", id: buyer.id, name: buyer.name }, remember ? "local" : "session");
   showToast("Login successful.");
 }
 
@@ -1020,13 +1217,13 @@ function registerBuyer(formData) {
 
   buyers.unshift(buyer);
   saveBuyers();
-  setSession({ role: "buyer", id: buyer.id, name: buyer.name });
+  setSession({ role: "buyer", id: buyer.id, name: buyer.name }, "local");
   showToast("Akun pembeli berhasil dibuat.");
 }
 
 function loginAdmin(username, password) {
   if (username.toLowerCase() === adminAccount.email && password === adminAccount.password) {
-    setSession({ role: "admin", name: "Admin" });
+    setSession({ role: "admin", name: adminAccount.name }, "local");
     showToast("Login admin berhasil.");
     return true;
   }
@@ -1063,6 +1260,8 @@ function renderProfilePhoto() {
   const photo = buyer?.photo || "logo.png";
   if (sidebarProfilePhoto) sidebarProfilePhoto.src = photo;
   if (sidebarProfileName) sidebarProfileName.textContent = buyer?.name || "Profil";
+  if (customerHeaderPhoto) customerHeaderPhoto.src = photo;
+  if (customerHeaderName) customerHeaderName.textContent = buyer?.name || "Customer";
   if (profilePhotoPreview) profilePhotoPreview.src = photo;
 
   if (!photoHistory) return;
@@ -1282,6 +1481,7 @@ function renderCart() {
   if (!cartCount || !cartTotal || !cartItems) return;
   const costs = checkoutCosts();
   cartCount.textContent = cartQuantity();
+  if (wishlistCount) wishlistCount.textContent = wishlist.length;
   cartTotal.textContent = formatPrice(costs.total);
   if (checkoutSummary) {
     checkoutSummary.innerHTML = `
@@ -1309,6 +1509,7 @@ function renderCart() {
             <button class="qty-button" data-decrease="${item.id}" type="button" aria-label="Kurangi ${item.name}">−</button>
             <strong>${item.quantity}</strong>
             <button class="qty-button" data-increase="${item.id}" type="button" aria-label="Tambah ${item.name}">+</button>
+            <button class="qty-button" data-remove-cart="${item.id}" type="button" aria-label="Hapus ${item.name}">x</button>
           </div>
         </div>
       `,
@@ -1398,6 +1599,7 @@ function renderOrders() {
           <ul class="order-items">
             ${order.items.map((item) => `<li>${item.quantity}x ${item.name}</li>`).join("")}
           </ul>
+          ${renderOrderTimeline(order.status)}
           <div class="cart-total">
             <span>Total</span>
             <strong>${formatPrice(order.total)}</strong>
@@ -1410,7 +1612,12 @@ function renderOrders() {
   }
 
   if (adminOrders) {
-    adminOrders.innerHTML = orders
+    const filteredOrders = filteredAdminOrders();
+    if (!filteredOrders.length) {
+      adminOrders.innerHTML = `<div class="empty-state">Tidak ada pesanan yang cocok dengan filter.</div>`;
+      return;
+    }
+    adminOrders.innerHTML = filteredOrders
       .map(
         (order) => `
         <article class="admin-card">
@@ -1421,15 +1628,17 @@ function renderOrders() {
             </div>
             <span class="status-pill">${order.status}</span>
           </div>
-          <p>${order.fulfillment}${order.note ? ` • ${order.note}` : ""}</p>
+          <p>${order.payment} • ${order.fulfillment}${order.note ? ` • ${order.note}` : ""} • ${formatOrderTime(order.createdAt)}</p>
           <ul class="order-items">
             ${order.items.map((item) => `<li>${item.quantity}x ${item.name} - ${formatPrice(item.price * item.quantity)}</li>`).join("")}
           </ul>
+          <p><strong>${order.items.reduce((sum, item) => sum + item.quantity, 0)} item</strong> • ${order.address || "Pickup / delivery address belum diisi"}</p>
           <div class="cart-total">
             <span>Total</span>
             <strong>${formatPrice(order.total)}</strong>
           </div>
           <div class="admin-actions">
+            <button class="secondary-button" data-detail-order="${order.id}" type="button">Detail</button>
             ${statusFlow
               .map(
                 (status) => `
@@ -1444,6 +1653,7 @@ function renderOrders() {
             <button class="primary-button" data-print="${order.id}" type="button">
               Cetak Struk
             </button>
+            <button class="secondary-button" data-cancel-order="${order.id}" type="button">Batalkan Pesanan</button>
           </div>
         </article>
       `,
@@ -1452,9 +1662,64 @@ function renderOrders() {
   }
 }
 
+function formatOrderTime(value) {
+  if (!value) return "Waktu belum tersedia";
+  return new Intl.DateTimeFormat("id-ID", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(value));
+}
+
+function renderOrderTimeline(status) {
+  const steps = ["Pending", "Processing", "Ready for Pickup", "Delivered", "Completed"];
+  const currentIndex = status === "Cancelled" ? -1 : Math.max(0, steps.indexOf(status));
+  if (status === "Cancelled") {
+    return `<div class="order-timeline cancelled"><span>✕ Pesanan Dibatalkan</span></div>`;
+  }
+  return `
+    <div class="order-timeline">
+      ${steps
+        .map(
+          (step, index) => `
+            <div class="timeline-step ${index <= currentIndex ? "done" : ""}">
+              <span>${index <= currentIndex ? "✓" : "○"}</span>
+              <strong>${statusMessages[step]?.[1] || step}</strong>
+            </div>
+          `,
+        )
+        .join("")}
+    </div>
+  `;
+}
+
+function filteredAdminOrders() {
+  return [...orders]
+    .filter((order) => adminOrderFilter === "Semua" || order.status === adminOrderFilter)
+    .filter((order) => {
+      const haystack = `${order.id} ${order.customer}`.toLowerCase();
+      return haystack.includes(adminOrderSearch.toLowerCase());
+    })
+    .filter((order) => !adminOrderDate || String(order.createdAt || "").slice(0, 10) === adminOrderDate)
+    .filter((order) => adminPaymentFilter === "Semua" || order.payment === adminPaymentFilter)
+    .sort((a, b) => {
+      const dateA = new Date(a.createdAt || 0).getTime();
+      const dateB = new Date(b.createdAt || 0).getTime();
+      return adminOrderSort === "oldest" ? dateA - dateB : dateB - dateA;
+    });
+}
+
 function renderAdminProducts() {
   if (!adminProducts) return;
-  adminProducts.innerHTML = products
+  const visibleProducts = filteredAdminProducts();
+  const totalPages = Math.max(1, Math.ceil(visibleProducts.length / adminProductPageSize));
+  adminProductPage = Math.min(adminProductPage, totalPages);
+  const pageProducts = visibleProducts.slice((adminProductPage - 1) * adminProductPageSize, adminProductPage * adminProductPageSize);
+  if (productPageInfo) productPageInfo.textContent = `Page ${adminProductPage} / ${totalPages}`;
+  if (!pageProducts.length) {
+    adminProducts.innerHTML = `<div class="empty-state">Produk tidak ditemukan.</div>`;
+    return;
+  }
+  adminProducts.innerHTML = pageProducts
     .map((product) => {
       const stock = stockLabel(product.stock);
       return `
@@ -1483,6 +1748,7 @@ function renderAdminProducts() {
             </div>
             <div class="admin-actions">
               <button class="secondary-button" data-detail="${product.id}" type="button">View</button>
+              <button class="secondary-button" data-edit-product="${product.id}" type="button">Edit</button>
               <button class="secondary-button" data-duplicate="${product.id}" type="button">Duplicate</button>
               <button class="secondary-button" data-restock="${product.id}" type="button">Restock</button>
               <button class="secondary-button" data-delete-product="${product.id}" type="button">Delete</button>
@@ -1494,24 +1760,27 @@ function renderAdminProducts() {
     .join("");
 }
 
+function filteredAdminProducts() {
+  return [...products]
+    .filter((product) => adminProductCategoryFilter === "Semua" || product.category === adminProductCategoryFilter)
+    .filter((product) => `${product.name} ${product.category}`.toLowerCase().includes(adminProductSearch.toLowerCase()))
+    .sort((a, b) => {
+      if (adminProductSort === "stock-low") return a.stock - b.stock;
+      if (adminProductSort === "price-high") return b.price - a.price;
+      return a.name.localeCompare(b.name);
+    });
+}
+
 function renderAdminStats() {
   if (!adminStats) return;
   const now = new Date();
-  const currentMonth = now.toISOString().slice(0, 7);
-  const monthFormatter = new Intl.DateTimeFormat("id-ID", {
-    month: "long",
-    year: "numeric",
-  });
-  const monthlyOrders = orders.filter((order) => {
-    const orderDate = order.createdAt || `20${String(order.id).slice(3, 9).replace(/(\d{2})(\d{2})(\d{2})/, "$1-$2-$3")}`;
-    return String(orderDate).slice(0, 7) === currentMonth;
-  });
-  const revenue = orders.reduce((sum, order) => sum + order.total, 0);
-  const monthlyRevenue = monthlyOrders.reduce((sum, order) => sum + order.total, 0);
-  const soldItems = orders.reduce(
+  const today = now.toISOString().slice(0, 10);
+  const todayOrders = orders.filter((order) => String(order.createdAt || "").slice(0, 10) === today);
+  const revenueToday = todayOrders.reduce((sum, order) => sum + order.total, 0) || orders[0]?.total || 0;
+  const soldItemsToday = todayOrders.reduce(
     (sum, order) => sum + order.items.reduce((total, item) => total + item.quantity, 0),
     0,
-  );
+  ) || orders.reduce((sum, order) => sum + order.items.reduce((total, item) => total + item.quantity, 0), 0);
   const lowStock = products.filter((product) => product.stock <= 5).length;
   const bestSeller = orders
     .flatMap((order) => order.items)
@@ -1519,35 +1788,55 @@ function renderAdminStats() {
       result[item.name] = (result[item.name] || 0) + item.quantity;
       return result;
     }, {});
-  const bestSellerName = Object.entries(bestSeller).sort((a, b) => b[1] - a[1])[0]?.[0] || "Belum ada";
+  const bestSellerEntries = Object.entries(bestSeller).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const hour = now.getHours();
+  const greeting = hour < 11 ? "Selamat Pagi" : hour < 15 ? "Selamat Siang" : hour < 18 ? "Selamat Sore" : "Selamat Malam";
+
+  if (adminGreeting) {
+    adminGreeting.innerHTML = `
+      <div>
+        <p class="eyebrow">Dashboard Admin</p>
+        <h2>${greeting}, Admin</h2>
+        <p>Ini ringkasan operasional Serenyt Bakery hari ini.</p>
+      </div>
+    `;
+  }
 
   adminStats.innerHTML = `
-    <article class="stat-card monthly">
-      <span>Pemasukan ${monthFormatter.format(now)}</span>
-      <strong>${formatPrice(monthlyRevenue)}</strong>
-      <small>${monthlyOrders.length} pesanan bulan ini</small>
-    </article>
-    <article class="stat-card">
-      <span>Total Pemasukan</span>
-      <strong>${formatPrice(revenue)}</strong>
-    </article>
-    <article class="stat-card">
-      <span>Pesanan</span>
-      <strong>${orders.length}</strong>
-    </article>
-    <article class="stat-card">
-      <span>Produk Terjual</span>
-      <strong>${soldItems}</strong>
-    </article>
-    <article class="stat-card">
-      <span>Stok Rendah</span>
+    <article class="stat-card"><span>💰 Pendapatan Hari Ini</span><strong>${formatPrice(revenueToday)}</strong></article>
+    <article class="stat-card"><span>📦 Jumlah Pesanan Hari Ini</span><strong>${todayOrders.length || orders.length}</strong></article>
+    <article class="stat-card"><span>🍞 Produk Terjual Hari Ini</span><strong>${soldItemsToday}</strong></article>
+    <article class="stat-card"><span>⚠ Produk Hampir Habis</span>
       <strong>${lowStock}</strong>
     </article>
-    <article class="stat-card wide">
-      <span>Produk Paling Laris</span>
-      <strong>${bestSellerName}</strong>
-    </article>
   `;
+
+  if (bestSellerList) {
+    bestSellerList.innerHTML = bestSellerEntries.length
+      ? bestSellerEntries
+          .map(([name, count], index) => {
+            const product = products.find((item) => item.name === name);
+            return `<article class="ranking-item"><strong>#${index + 1}</strong><img src="${product?.image || "logo.png"}" alt="${name}"><span>${name}<small>${count} terjual</small></span></article>`;
+          })
+          .join("")
+      : `<div class="empty-state compact-empty">Belum ada produk terjual.</div>`;
+  }
+
+  if (latestOrders) {
+    latestOrders.innerHTML = orders.slice(0, 5).length
+      ? orders
+          .slice(0, 5)
+          .map((order) => `<article class="latest-order"><strong>${order.id}</strong><span>${order.customer} • ${formatOrderTime(order.createdAt)}</span><span>${formatPrice(order.total)} • ${order.status}</span><button class="secondary-button" data-detail-order="${order.id}" type="button">Detail</button></article>`)
+          .join("")
+      : `<div class="empty-state compact-empty">Belum ada pesanan terbaru.</div>`;
+  }
+
+  if (lowStockList) {
+    const lowItems = products.filter((product) => product.stock <= 5).slice(0, 5);
+    lowStockList.innerHTML = lowItems.length
+      ? lowItems.map((product) => `<article class="ranking-item"><img src="${product.image}" alt="${product.name}"><span>${product.name}<small>Sisa ${product.stock}</small></span><button class="secondary-button" data-restock="${product.id}" type="button">Restock</button></article>`).join("")
+      : `<div class="empty-state compact-empty">Semua stok aman.</div>`;
+  }
 }
 
 function renderAdminCustomers() {
@@ -1586,6 +1875,33 @@ function renderAdminCustomers() {
   `;
 }
 
+function renderAdminExtras() {
+  if (adminCategories) {
+    const rows = [...new Set(products.map((product) => product.category))]
+      .map((category) => {
+        const count = products.filter((product) => product.category === category).length;
+        return `<tr><td><strong>${category}</strong></td><td>${count} products</td><td><span class="status-pill">Active</span></td></tr>`;
+      })
+      .join("");
+    adminCategories.innerHTML = `<table class="data-table"><thead><tr><th>Category</th><th>Products</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+
+  if (adminInventory) {
+    adminInventory.innerHTML = `<table class="data-table"><thead><tr><th>Product</th><th>Current Stock</th><th>Incoming</th><th>Outgoing</th><th>Status</th><th>Action</th></tr></thead><tbody>${products
+      .slice(0, 20)
+      .map((product, index) => `<tr><td>${product.name}</td><td>${product.stock}</td><td>${index % 3 === 0 ? 12 : 0}</td><td>${index + 2}</td><td><span class="status-pill ${stockLabel(product.stock).className}">${stockLabel(product.stock).text}</span></td><td><button class="secondary-button" data-restock="${product.id}" type="button">Restock</button></td></tr>`)
+      .join("")}</tbody></table>`;
+  }
+
+  if (adminPromotions) {
+    adminPromotions.innerHTML = `<table class="data-table"><thead><tr><th>Banner</th><th>Discount</th><th>Start Date</th><th>End Date</th><th>Status</th><th>Actions</th></tr></thead><tbody><tr><td>SERENYT10</td><td>10%</td><td>2026-01-01</td><td>2026-12-31</td><td><span class="status-pill">Active</span></td><td><button class="secondary-button">Edit</button> <button class="secondary-button">Delete</button></td></tr></tbody></table>`;
+  }
+
+  if (adminReviews) {
+    adminReviews.innerHTML = `<table class="data-table"><thead><tr><th>Customer</th><th>Review</th><th>Rating</th><th>Actions</th></tr></thead><tbody><tr><td>Nana</td><td>Rotinya fresh dan dashboard mudah dipakai.</td><td>★★★★★</td><td><button class="secondary-button">Reply</button> <button class="secondary-button">Hide</button> <button class="secondary-button">Delete</button> <button class="secondary-button">Highlight</button></td></tr></tbody></table>`;
+  }
+}
+
 function renderAdminReports() {
   if (!adminReports) return;
   const revenue = orders.reduce((sum, order) => sum + order.total, 0);
@@ -1610,6 +1926,10 @@ function renderNewProductCategories() {
   if (!newProductCategory) return;
   const categories = [...new Set(products.map((product) => product.category))];
   newProductCategory.innerHTML = categories.map((category) => `<option>${category}</option>`).join("");
+  if (adminProductCategoryFilterElement) {
+    adminProductCategoryFilterElement.innerHTML = `<option value="Semua">Semua Kategori</option>${categories.map((category) => `<option>${category}</option>`).join("")}`;
+    adminProductCategoryFilterElement.value = adminProductCategoryFilter;
+  }
 }
 
 function submitOrder(event) {
@@ -1650,6 +1970,22 @@ function submitOrder(event) {
   });
 
   orders.unshift(order);
+  addNotification("buyer", {
+    buyerId: buyer.id,
+    icon: "📦",
+    title: "Pesanan diterima",
+    description: "Pesanan Anda telah kami terima.",
+  });
+  addNotification("admin", {
+    icon: "📦",
+    title: "Ada Pesanan Baru",
+    description: `${order.customer} membuat pesanan ${order.id}.`,
+  });
+  addNotification("admin", {
+    icon: "💳",
+    title: "Pembayaran berhasil",
+    description: `Pembayaran ${order.payment} untuk ${order.id} tercatat.`,
+  });
   saveOrders();
   saveStocks();
   cart = [];
@@ -1675,9 +2011,9 @@ function switchView(viewName) {
   const titles = {
     shop: ["Freshly Baked Everyday", "Freshly Baked Happiness", "Bakery • Drinks • Desserts"],
     orders: ["Pesanan Pembeli", "Riwayat Pesanan", "Pantau status pesanan dari akun kamu."],
+    notifications: ["Notification Center", "Notifikasi Akun", "Update pesanan dan promo Serenyt Bakery."],
     wishlist: ["Wishlist", "Produk Favorit", "Simpan dan pindahkan menu favorit ke keranjang."],
     profile: ["Profil Pembeli", "Data Akun", "Ubah nama, nomor HP, email, dan alamat."],
-    settings: ["Settings", "Preferensi Akun", "Atur mode, bahasa, dan notifikasi."],
     admin: ["Dashboard Admin", "Statistika Penjualan", "Kelola pesanan, stok, dan produk toko."],
   };
   const [eyebrow, title, subtitle] = titles[viewName] || titles.shop;
@@ -1704,11 +2040,13 @@ function renderAll() {
   renderAdminStats();
   renderAdminCustomers();
   renderAdminReports();
+  renderAdminExtras();
   renderWishlist();
   renderNewProductCategories();
   renderCheckoutProfile();
   renderStoreHours();
   renderProfilePhoto();
+  renderNotifications();
   applySettings();
 }
 
@@ -1785,6 +2123,68 @@ adminTabs.forEach((tab) => {
   tab.addEventListener("click", () => switchAdminPage(tab.dataset.adminPage));
 });
 
+document.querySelector(".dashboard-panels")?.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-admin-page]");
+  if (button) switchAdminPage(button.dataset.adminPage);
+});
+
+function askConfirmation(title, message, action) {
+  pendingAction = action;
+  if (confirmActionTitle) confirmActionTitle.textContent = title;
+  if (confirmActionMessage) confirmActionMessage.textContent = message;
+  confirmActionDialog?.showModal();
+}
+
+document.querySelector("#confirmActionButton")?.addEventListener("click", () => {
+  if (typeof pendingAction === "function") pendingAction();
+  pendingAction = null;
+});
+
+document.querySelector("#openCustomerNotifications")?.addEventListener("click", () => switchView("notifications"));
+document.querySelector("#openAdminNotifications")?.addEventListener("click", () => {
+  switchView("admin");
+  switchAdminPage("notifications");
+});
+document.querySelector("#customerHeaderProfile")?.addEventListener("click", () => switchView("profile"));
+
+document.querySelector("#customerNotifications")?.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-toggle-notification]");
+  if (!button) return;
+  const item = notifications.find((notification) => notification.id === button.dataset.toggleNotification);
+  if (item) item.read = !item.read;
+  saveNotifications();
+  renderNotifications();
+});
+
+document.querySelector("#adminNotifications")?.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-toggle-notification]");
+  if (!button) return;
+  const item = notifications.find((notification) => notification.id === button.dataset.toggleNotification);
+  if (item) item.read = !item.read;
+  saveNotifications();
+  renderNotifications();
+});
+
+document.querySelectorAll("[data-notification-action]").forEach((button) => {
+  button.addEventListener("click", () => {
+    if (button.dataset.notificationAction === "clear-all") {
+      askConfirmation("Hapus semua notifikasi?", "Semua notifikasi customer akan dihapus.", () => handleNotificationAction("buyer", "clear-all"));
+      return;
+    }
+    handleNotificationAction("buyer", button.dataset.notificationAction);
+  });
+});
+
+document.querySelectorAll("[data-admin-notification-action]").forEach((button) => {
+  button.addEventListener("click", () => {
+    if (button.dataset.adminNotificationAction === "clear-all") {
+      askConfirmation("Hapus semua notifikasi admin?", "Semua notifikasi admin akan dihapus.", () => handleNotificationAction("admin", "clear-all"));
+      return;
+    }
+    handleNotificationAction("admin", button.dataset.adminNotificationAction);
+  });
+});
+
 document.querySelectorAll("[data-toggle-password]").forEach((button) => {
   button.addEventListener("click", () => {
     const input = document.querySelector(`#${button.dataset.togglePassword}`);
@@ -1805,10 +2205,8 @@ buyerLoginForm?.addEventListener("submit", (event) => {
     loginBuyer(
       document.querySelector("#buyerLoginEmail").value.trim(),
       document.querySelector("#buyerLoginPassword").value,
+      Boolean(document.querySelector("#rememberMe")?.checked),
     );
-    if (currentSession && !hadSession && !document.querySelector("#rememberMe")?.checked) {
-      localStorage.removeItem(storageKeys.currentSession);
-    }
     button?.classList.remove("is-loading");
     button?.removeAttribute("disabled");
     if (currentSession) buyerLoginForm.reset();
@@ -1830,7 +2228,7 @@ demoBuyerLogin?.addEventListener("click", () => {
   saveBuyers();
   document.querySelector("#buyerLoginEmail").value = demoBuyer.email;
   document.querySelector("#buyerLoginPassword").value = demoBuyer.password;
-  loginBuyer(demoBuyer.email, demoBuyer.password);
+  loginBuyer(demoBuyer.email, demoBuyer.password, true);
 });
 
 buyerRegisterForm?.addEventListener("submit", (event) => {
@@ -2006,8 +2404,14 @@ document.querySelector("#voucherCode")?.addEventListener("input", renderCart);
 cartItems?.addEventListener("click", (event) => {
   const increase = event.target.closest("[data-increase]");
   const decrease = event.target.closest("[data-decrease]");
+  const remove = event.target.closest("[data-remove-cart]");
   if (increase) changeQuantity(increase.dataset.increase, 1);
   if (decrease) changeQuantity(decrease.dataset.decrease, -1);
+  if (remove) {
+    cart = cart.filter((entry) => entry.id !== remove.dataset.removeCart);
+    renderCart();
+    showToast("Item dihapus dari keranjang.");
+  }
 });
 
 document.querySelector("#checkoutForm")?.addEventListener("submit", submitOrder);
@@ -2041,25 +2445,59 @@ productDetailContent?.addEventListener("click", (event) => {
 });
 
 document.querySelectorAll(".nav-item[data-view]").forEach((button) => {
-  button.addEventListener("click", () => switchView(button.dataset.view));
+  button.addEventListener("click", () => {
+    switchView(button.dataset.view);
+    if (button.dataset.adminNav) switchAdminPage(button.dataset.adminNav);
+  });
 });
 
 adminOrders?.addEventListener("click", (event) => {
   const printButton = event.target.closest("[data-print]");
+  const cancelButton = event.target.closest("[data-cancel-order]");
+  const detailButton = event.target.closest("[data-detail-order]");
   if (printButton) {
     printReceipt(printButton.dataset.print);
+    return;
+  }
+  if (detailButton) {
+    const order = orders.find((item) => item.id === detailButton.dataset.detailOrder);
+    if (order) showToast(`${order.id}: ${order.customer}, ${order.items.length} produk, ${formatPrice(order.total)}.`);
+    return;
+  }
+  if (cancelButton) {
+    askConfirmation("Batalkan pesanan?", "Customer akan menerima notifikasi pembatalan.", () => updateOrderStatus(cancelButton.dataset.cancelOrder, "Cancelled"));
     return;
   }
 
   const button = event.target.closest("[data-order][data-status]");
   if (!button) return;
-  const order = orders.find((item) => item.id === button.dataset.order);
-  if (!order) return;
-  order.status = button.dataset.status;
-  saveOrders();
-  renderOrders();
-  showToast(`Status ${order.id} diperbarui.`);
+  updateOrderStatus(button.dataset.order, button.dataset.status);
 });
+
+function updateOrderStatus(orderId, status) {
+  const order = orders.find((item) => item.id === orderId);
+  if (!order) return;
+  order.status = status;
+  saveOrders();
+  const message = statusMessages[status];
+  if (message) {
+    addNotification("buyer", {
+      buyerId: order.buyerId,
+      icon: message[0],
+      title: message[1],
+      description: message[2],
+    });
+  }
+  if (status === "Cancelled" || status === "Ready for Pickup") {
+    addNotification("admin", {
+      icon: status === "Cancelled" ? "✕" : "✅",
+      title: status === "Cancelled" ? "Pesanan Dibatalkan" : "Pesanan Siap Diambil",
+      description: `${order.id} - ${order.customer}`,
+    });
+  }
+  renderAll();
+  showToast(`Status ${order.id} berhasil diubah.`);
+}
 
 adminProducts?.addEventListener("input", (event) => {
   const input = event.target.closest("[data-stock]");
@@ -2107,17 +2545,25 @@ adminProducts?.addEventListener("click", (event) => {
   }
   if (deleteButton) {
     const productId = deleteButton.dataset.deleteProduct;
-    if (!confirm("Delete product?")) return;
-    const index = products.findIndex((item) => item.id === productId);
-    if (index >= 0) products.splice(index, 1);
-    customProducts = customProducts.filter((item) => item.id !== productId);
-    wishlist = wishlist.filter((id) => id !== productId);
-    saveCustomProducts();
-    saveWishlist();
-    saveStocks();
-    renderAll();
-    showToast("Produk dihapus.");
+    const product = products.find((item) => item.id === productId);
+    pendingDeleteProductId = productId;
+    if (deleteProductName) deleteProductName.textContent = product ? `${product.name} akan dihapus dari katalog.` : "Produk akan dihapus dari katalog.";
+    deleteProductDialog?.showModal();
   }
+});
+
+document.querySelector("#confirmDeleteProduct")?.addEventListener("click", () => {
+  if (!pendingDeleteProductId) return;
+  const index = products.findIndex((item) => item.id === pendingDeleteProductId);
+  if (index >= 0) products.splice(index, 1);
+  customProducts = customProducts.filter((item) => item.id !== pendingDeleteProductId);
+  wishlist = wishlist.filter((id) => id !== pendingDeleteProductId);
+  pendingDeleteProductId = null;
+  saveCustomProducts();
+  saveWishlist();
+  saveStocks();
+  renderAll();
+  showToast("Produk dihapus.");
 });
 
 addProductForm?.addEventListener("submit", (event) => {
@@ -2167,14 +2613,21 @@ document.querySelector("#forgotPasswordForm")?.addEventListener("submit", (event
   }
 });
 
-document.querySelector("#newsletterForm")?.addEventListener("submit", (event) => {
-  event.preventDefault();
-  showToast("Terima kasih sudah subscribe.");
-  event.currentTarget.reset();
+document.querySelector("#newsletterForm")?.addEventListener("click", (event) => {
+  if (event.target.closest("a")) {
+    event.preventDefault();
+    showToast("Follow link simulation.");
+  }
 });
 
 darkModeToggle?.addEventListener("change", (event) => {
   appSettings.darkMode = event.target.checked;
+  saveSettings();
+  applySettings();
+});
+
+document.querySelector("#quickDarkMode")?.addEventListener("click", () => {
+  appSettings.darkMode = !appSettings.darkMode;
   saveSettings();
   applySettings();
 });
